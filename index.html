@@ -108,6 +108,7 @@ input[type=search]{padding-left:42px;background:var(--surface) url("data:image/s
 
 /* ---- dashboard + wide screens: sidebar, KPI row, two-column views ---- */
 .nav-logo{display:none}
+#gate,#verify{width:100%;max-width:420px;margin:6vh auto 0}
 #pageTitle{display:none;margin:0;font-family:var(--display);font-size:23px;font-weight:500;letter-spacing:-.01em}
 .side,.main{display:contents}
 .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -127,10 +128,10 @@ input[type=search]{padding-left:42px;background:var(--surface) url("data:image/s
   .nav-logo{display:block;width:150px;height:auto;margin:4px 10px 28px}
   .nav-in{flex-direction:column;max-width:none;margin:0;padding:0;gap:4px;background:none;box-shadow:none;border-radius:0;-webkit-backdrop-filter:none;backdrop-filter:none}
   .nav button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;border-radius:14px;font-size:14.5px}
-  .bar,.wrap{margin-left:236px}
-  .deco{left:236px}
-  .bar .logo{display:none}
-  #pageTitle{display:block}
+  .in .bar,.in .wrap{margin-left:236px}
+  .in .deco{left:236px}
+  .in .bar .logo{display:none}
+  .in #pageTitle{display:block}
   .bar-in,.wrap{max-width:1240px;padding-left:32px;padding-right:32px}
   .bar-in{padding-block:20px 14px}
   .wrap{padding-block:6px 48px;gap:20px}
@@ -275,7 +276,7 @@ input[type=search]{padding-left:42px;background:var(--surface) url("data:image/s
     <div class="list" id="salesList"></div>
   </div>
   </section>
-  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 10</div>
+  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 11</div>
 </main>
 
 <nav class="nav" id="nav" hidden><img class="nav-logo" src="logo.png" width="640" height="177" alt=""><div class="nav-in">
@@ -399,7 +400,7 @@ const tagHtml = c => `<span class="tag">${esc(c)}</span>`;
 /* ---------- render ---------- */
 function render(){
   if (!ready.p || !ready.s) return;
-  $('#status').hidden = true; $('#nav').hidden = false;
+  $('#status').hidden = true; $('#nav').hidden = false; document.body.classList.add('in');
   if (downloads) $('#exportBtn').hidden = false;
   for (const v of ['home','sell','stock','sales']) $('#v-' + v).hidden = v !== view;
   $('#pageTitle').textContent = {home:'Dashboard', sell:'Sell', stock:'Stock', sales:'Sales'}[view];
@@ -889,7 +890,7 @@ $('#exportBtn').addEventListener('click', async () => {
     db = firebase.firestore();
     try { db.settings({ignoreUndefinedProperties:true}); } catch(e) {}
     db.enablePersistence({synchronizeTabs:true}).catch(() => {});
-    const fail = () => { $('#status').hidden = false; $('#nav').hidden = true; for (const v of ['home','sell','stock','sales']) $('#v-' + v).hidden = true;
+    const fail = () => { $('#status').hidden = false; $('#nav').hidden = true; document.body.classList.remove('in'); for (const v of ['home','sell','stock','sales']) $('#v-' + v).hidden = true;
       $('#status').textContent = 'This Google account (' + (user.email || '') + ') is not on the allowed list. Sign out and use a partner account.'; };
     db.collection('products').onSnapshot(snap => {
       products = new Map(snap.docs.map(d => { const x = d.data() || {}; return [d.id, {...x, code:d.id}]; }));
