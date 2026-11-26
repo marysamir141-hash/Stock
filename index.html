@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>em.em Stock</title>
+<link rel="icon" href="logo.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Lexend+Deca:wght@300;400;500;600&display=swap">
+<style>
+/* Layout: one-hand phone tool. Sticky brand bar, three views on a bottom tab bar,
+   every product row led by its label code drawn as a punched price tag. */
+:root{
+  --bg:#fbecea; --surface:#ffffff; --sunk:#f4dedb; --ink:#2c4a4a; --muted:#66757a; --line:#f0d8d5;
+  --accent:#457373; --accent-ink:#ffffff; --accent-soft:#dcebe9; --star:#fff8f7; --logo-filter:none;
+  --good:#1f7a55; --good-soft:#dcf1e7; --bad:#b3261e; --bad-soft:#f9e1df;
+  --display:"Lexend Deca",system-ui,sans-serif; --body:"Lexend Deca",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --starshape:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 0C52 38 62 48 100 50 62 52 52 62 50 100 48 62 38 52 0 50 38 48 48 38 50 0Z'/%3E%3C/svg%3E");
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:12px;
+}
+/* One look on purpose: blush and teal in both light and dark app themes. */
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar-in,.wrap,.nav-in{max-width:640px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar-in{display:flex;align-items:center;gap:12px;padding-block:10px}
+.mark{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:lowercase}
+.mark small{font-family:var(--body);font-weight:500;font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-left:8px}
+.spacer{flex:1}
+
+.wrap{padding-block:16px calc(96px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.note{background:var(--sunk);border-radius:var(--r);padding:10px 12px;color:var(--muted);font-size:13px}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+input,select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 12px;min-height:44px}
+.row{display:flex;gap:10px}
+.row>*{flex:1;min-width:0}
+
+.stats{display:flex;gap:10px}
+.stat{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
+.stat b{display:block;font-family:var(--display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.15}
+.stat span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;min-height:44px;font-weight:600;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.small{min-height:36px;padding:6px 12px;font-size:13px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:default}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:500;min-height:34px}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+
+.list{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.item{display:flex;align-items:center;gap:12px;padding:12px;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item.out{background:var(--sunk)}
+.item.out .nm,.item.out .tag{opacity:.55}
+.info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.nm{font-weight:600;overflow-wrap:anywhere}
+.meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.price{font-family:var(--display);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{position:relative;display:inline-block;font-family:var(--mono);font-weight:600;font-size:12.5px;letter-spacing:.04em;
+  padding:2px 8px 2px 18px;border:1px solid var(--ink);border-radius:3px 6px 6px 3px;color:var(--ink);white-space:nowrap}
+.tag::before{content:"";position:absolute;left:6px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;border:1px solid var(--ink)}
+.pill{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:2px 8px}
+.pill.in{background:var(--good-soft);color:var(--good)}
+.pill.out{background:var(--bad-soft);color:var(--bad)}
+.pill.hm{background:var(--accent-soft);color:var(--accent)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-family:var(--display);font-size:17px;margin-bottom:4px}
+
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:9;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav-in{display:flex}
+.nav button{flex:1;border:0;background:none;padding:12px 4px 10px;font-weight:600;font-size:13px;color:var(--muted);border-top:3px solid transparent;margin-top:-1px}
+.nav button[aria-current="page"]{color:var(--accent);border-top-color:var(--accent)}
+
+.scrim{position:fixed;inset:0;z-index:20;background:rgba(10,12,18,.55);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:640px;max-height:92%;overflow:auto;background:var(--surface);border-radius:18px 18px 0 0;
+  padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  display:flex;flex-direction:column;gap:14px}
+.sheet h2{margin:0;font-family:var(--display);font-size:19px;text-wrap:balance}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;border:0;background:var(--surface);padding:10px;min-height:44px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:30;
+  background:var(--ink);color:var(--bg);border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:500;max-width:90%;text-align:center}
+
+/* ---- em.em brand pass: sand ground, cream stars, teal ink, pill controls ---- */
+body::before{background:var(--bg)}
+.deco{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.deco i{position:absolute;background:var(--star);-webkit-mask:var(--starshape) center/contain no-repeat;mask:var(--starshape) center/contain no-repeat}
+.deco i:nth-child(1){width:560px;height:560px;left:-230px;top:-170px}
+.deco i:nth-child(2){width:280px;height:280px;right:-110px;top:52%}
+.wrap{position:relative;z-index:1}
+.bar{background:var(--bg);border-bottom:0}
+.bar-in{padding-block:14px 6px}
+.logo{display:block;width:136px;height:auto;filter:var(--logo-filter)}
+.view{display:flex;flex-direction:column;gap:14px}
+.field>span,.stat span{letter-spacing:.16em;font-weight:500}
+input,select{border-radius:14px}
+.stat{border:0;border-radius:20px;padding:14px 16px}
+.stat b{font-weight:400;font-size:28px}
+.stats .stat:first-child{background:var(--accent);color:var(--accent-ink)}
+.stats .stat:first-child span{color:var(--accent-ink);opacity:.82}
+.list{border-radius:20px}
+.list,.stat,.note{box-shadow:0 2px 14px rgba(69,115,115,.07)}
+.item{padding:14px}
+.nm{font-weight:500}
+.price{font-weight:500;color:var(--accent);font-size:17px}
+.tag,.tag::before{border-color:var(--accent)}
+.tag{color:var(--accent)}
+.btn{border-radius:999px;font-weight:500}
+.btn.primary{letter-spacing:.06em}
+.btn.block{text-transform:uppercase;letter-spacing:.16em;font-size:13px;min-height:50px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg{border-radius:999px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.sheet{border-radius:28px 28px 0 0}
+.sheet h2{font-weight:400;font-size:22px}
+.note{background:var(--surface)}
+.empty b{font-weight:400;font-size:20px}
+.empty::before{content:"";display:block;width:34px;height:34px;margin:0 auto 10px;background:var(--accent);-webkit-mask:var(--starshape) center/contain no-repeat;mask:var(--starshape) center/contain no-repeat}
+.nav{background:transparent;border-top:0;pointer-events:none;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.nav-in{pointer-events:auto;max-width:360px;padding:6px;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;box-shadow:0 8px 26px rgba(44,74,74,.2)}
+.nav button{border-top:0;margin:0;border-radius:999px;padding:12px 4px;text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:500}
+.nav button[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
+.toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+</style>
+
+<div class="deco" aria-hidden="true"><i></i><i></i></div>
+<header class="bar"><div class="bar-in">
+  <img class="logo" src="logo.png" width="640" height="177" alt="em.em, two souls, one design">
+  <div class="spacer"></div>
+  <button class="btn small" id="signOut" type="button" hidden>Sign out</button>
+  <button class="btn small" id="exportBtn" type="button" hidden>Export Excel</button>
+</div></header>
+
+<main class="wrap">
+  <div class="note" id="status">Loading…</div>
+  <form id="gate" class="list" hidden><div class="empty" style="display:flex;flex-direction:column;gap:12px;text-align:left">
+    <b style="text-align:center">Sign in to open the stock</b>
+    <label class="field"><span>Email</span><input id="auEmail" type="email" autocomplete="username" required></label>
+    <label class="field"><span>Password</span><input id="auPass" type="password" autocomplete="current-password" minlength="6" required></label>
+    <button class="btn primary block" id="signIn" type="submit">Sign in</button>
+    <button class="btn block" id="signUp" type="button">First time? Create my password</button>
+    <button class="btn small" id="forgot" type="button" style="align-self:center;border:0;background:none">Forgot password</button>
+  </div></form>
+  <div id="verify" class="list" hidden><div class="empty"><b>Check your email</b><span id="verifyMsg"></span><br><br>
+    <button class="btn primary" id="verified" type="button">I clicked the link</button> <button class="btn" id="resend" type="button">Send again</button></div></div>
+
+  <!-- SELL -->
+  <section id="v-sell" class="view" hidden>
+    <div class="row">
+      <label class="field" style="flex:2"><span>Bazaar you are at now</span>
+        <input id="bazaar" type="text" placeholder="e.g. Zamalek Bazaar" autocomplete="off"></label>
+      <label class="field"><span>Table cost</span>
+        <input id="tableCost" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="sPieces">0</b><span>Pieces sold</span></div>
+      <div class="stat"><b id="sRev">0</b><span>EGP taken</span></div>
+    </div>
+    <div class="note" id="tableNote" hidden></div>
+    <button class="btn block" id="tableBtn" type="button" hidden></button>
+    <label class="field"><span>Find by code or name</span>
+      <input id="q" type="search" placeholder="SN004 or heart necklace" autocomplete="off"></label>
+    <div class="list" id="sellList"></div>
+  </section>
+
+  <!-- STOCK -->
+  <section id="v-stock" class="view" hidden>
+    <button class="btn primary block" id="addBtn" type="button">Add a product</button>
+    <label class="field"><span>Website takes (% of each sale)</span>
+      <input id="webFee" type="number" inputmode="decimal" min="0" max="90" step="any" placeholder="0"></label>
+    <div class="note" id="webNote" hidden></div>
+    <div class="chips" id="stockChips">
+      <button class="chip" type="button" data-f="all" aria-pressed="true">All</button>
+      <button class="chip" type="button" data-f="in" aria-pressed="false">In stock</button>
+      <button class="chip" type="button" data-f="out" aria-pressed="false">Sold out</button>
+      <button class="chip" type="button" data-f="stainless" aria-pressed="false">Stainless</button>
+      <button class="chip" type="button" data-f="handmade" aria-pressed="false">Handmade</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="kLeft">0</b><span>Pieces left</span></div>
+      <div class="stat"><b id="kValue">0</b><span>EGP stock value</span></div>
+    </div>
+    <div class="list" id="stockList"></div>
+  </section>
+
+  <!-- SALES -->
+  <section id="v-sales" class="view" hidden>
+    <label class="field"><span>Show sales from</span><select id="salesFilter"></select></label>
+    <div class="stats">
+      <div class="stat"><b id="tPieces">0</b><span>Pieces</span></div>
+      <div class="stat"><b id="tRev">0</b><span>EGP revenue</span></div>
+      <div class="stat"><b id="tProfit">0</b><span>EGP net profit</span></div>
+    </div>
+    <div class="note" id="salesNote" hidden></div>
+    <div class="row">
+      <label class="field"><span>Partner 1</span><input id="pA" type="text" autocomplete="off"></label>
+      <label class="field"><span>Partner 2</span><input id="pB" type="text" autocomplete="off"></label>
+    </div>
+    <div class="row">
+      <label class="field"><span id="lblA">Partner 1 %</span><input id="shareA" type="number" inputmode="decimal" min="0" max="100" step="any"></label>
+      <label class="field"><span id="lblB">Partner 2 %</span><input id="shareB" type="number" inputmode="decimal" min="0" max="100" step="any"></label>
+      <label class="field"><span>Brand %</span><input id="keep" type="number" inputmode="decimal" min="0" max="90" step="any"></label>
+    </div>
+    <div class="list" id="splitList"></div>
+    <div class="field"><span>Every sale</span></div>
+    <div class="list" id="salesList"></div>
+  </section>
+</main>
+
+<nav class="nav" id="nav" hidden><div class="nav-in">
+  <button type="button" data-v="sell" aria-current="page">Sell</button>
+  <button type="button" data-v="stock">Stock</button>
+  <button type="button" data-v="sales">Sales</button>
+</div></nav>
+
+<!-- Sell sheet -->
+<div class="scrim" id="sellSheet" hidden><form class="sheet" id="sellForm">
+  <h2 id="sellTitle">Mark as sold</h2>
+  <div class="meta" id="sellMeta"></div>
+  <div class="row">
+    <label class="field"><span>Sold for (EGP)</span><input id="sellPrice" type="number" inputmode="decimal" min="0" step="any" required></label>
+    <label class="field" id="sellQtyWrap"><span>How many</span><input id="sellQty" type="number" inputmode="numeric" min="1" step="1" value="1" required></label>
+  </div>
+  <div class="row">
+    <button class="btn" type="button" data-close>Cancel</button>
+    <button class="btn primary" type="submit" id="sellGo">Mark sold</button>
+  </div>
+</form></div>
+
+<!-- Product sheet -->
+<div class="scrim" id="prodSheet" hidden><form class="sheet" id="prodForm">
+  <h2 id="prodTitle">Add a product</h2>
+  <div class="seg" id="catSeg">
+    <button type="button" data-cat="stainless" aria-pressed="true">Stainless steel</button>
+    <button type="button" data-cat="handmade" aria-pressed="false">Handmade</button>
+  </div>
+  <div class="row">
+    <label class="field"><span>Type</span><select id="pType"></select></label>
+    <div class="field"><span>Label code</span><div style="min-height:44px;display:flex;align-items:center"><span class="tag" id="pCode">SN001</span></div></div>
+  </div>
+  <label class="field"><span>Name</span><input id="pName" type="text" placeholder="e.g. Gold heart necklace" required autocomplete="off"></label>
+  <div class="row">
+    <label class="field"><span>Cost</span><input id="pCost" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
+    <label class="field"><span>Bag</span><input id="pBag" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
+    <label class="field"><span>Clasp</span><input id="pClasp" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
+  </div>
+  <div class="row">
+    <label class="field"><span>Cost × how many</span><input id="pMul" type="number" inputmode="decimal" min="1" step="any" value="2"></label>
+    <label class="field"><span>Extra on top</span><input id="pExtra" type="number" inputmode="decimal" min="0" step="any" value="30"></label>
+  </div>
+  <div class="row">
+    <label class="field"><span>Selling price (EGP)</span><input id="pPrice" type="number" inputmode="decimal" min="0" step="any" required></label>
+    <label class="field"><span>Quantity in stock</span><input id="pQty" type="number" inputmode="numeric" min="1" step="1" value="1" required></label>
+  </div>
+  <div class="note" id="pCalc">Total cost 0 EGP</div>
+  <div class="row">
+    <button class="btn" type="button" data-close>Cancel</button>
+    <button class="btn primary" type="submit" id="prodGo">Save product</button>
+  </div>
+  <button class="btn danger block" type="button" id="prodDel" hidden>Delete this product</button>
+</form></div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => { const n = Number(v); return isFinite(n) ? n : 0; };
+const money = n => Math.round(num(n)).toLocaleString('en-US');
+const TYPES = {necklace:['N','Necklace'],bracelet:['B','Bracelet'],ring:['R','Ring'],earrings:['E','Earrings'],anklet:['A','Anklet'],set:['S','Set'],other:['X','Other']};
+const NO_BAZAAR = 'No bazaar name';
+
+let db = null, downloads = null;
+let products = new Map(), sales = [], bazaar = '';
+let view = 'sell', stockFilter = 'all', salesFilter = '__all';
+let selling = null, editing = null, formCat = 'stainless';
+let ready = {p:false, s:false};
+let tables = {}, priceTouched = false, tableShare = 0, tableApplied = false, tableArmed = false;
+const mem = { get(k){ try { return localStorage.getItem('emem.' + k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem('emem.' + k, v); } catch(e){} } };
+let webFee = 0, pA = 'Partner 1', pB = 'Partner 2', shareA = 50, keep = 30;
+const settingsBody = () => ({bazaar, webFee, pA, pB, shareA, keep});
+const splitOf = net => { const kept = net > 0 ? Math.round(net * keep / 100) : 0, pool = Math.max(0, net - kept), a = Math.round(pool * shareA / 100); return {kept, a, b: pool - a}; };
+const webPrice = p => webFee > 0 && webFee < 100 ? Math.ceil((num(p.price) - num(p.tableAdd)) / (1 - webFee / 100) / 5) * 5 : 0;
+const grossOf = rows => rows.reduce((a,s) => a + num(s.qty) * (num(s.price) - num(s.cost)), 0);
+
+$('#pType').innerHTML = Object.entries(TYPES).map(([k,v]) => `<option value="${k}">${v[1]}</option>`).join('');
+
+/* ---------- helpers ---------- */
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
+async function write(fn, okMsg){
+  try { const late = await Promise.race([fn().then(() => false), new Promise(r => setTimeout(() => r(true), 4000))]); toast(late ? 'Saved on this phone. It will sync when the internet is back.' : (okMsg || 'Saved')); return true; }
+  catch(e){ toast(e && e.code === 'quota_exceeded' ? 'Storage is full. Delete old sales first.' : 'Could not save. Check your connection and try again.'); return false; }
+}
+function soldMap(){ const m = {}; for (const s of sales) m[s.code] = (m[s.code] || 0) + num(s.qty); return m; }
+function nextCode(cat, type){
+  const pre = (cat === 'handmade' ? 'H' : 'S') + TYPES[type][0];
+  let max = 0;
+  for (const c of products.keys()) if (c.startsWith(pre)) { const n = parseInt(c.slice(2), 10); if (n > max) max = n; }
+  return pre + String(max + 1).padStart(3, '0');
+}
+const curBazaar = () => bazaar.trim() || NO_BAZAAR;
+const tagHtml = c => `<span class="tag">${esc(c)}</span>`;
+
+/* ---------- render ---------- */
+function render(){
+  if (!ready.p || !ready.s) return;
+  $('#status').hidden = true; $('#nav').hidden = false;
+  if (downloads) $('#exportBtn').hidden = false;
+  for (const v of ['sell','stock','sales']) $('#v-' + v).hidden = v !== view;
+  document.querySelectorAll('#nav button').forEach(b => b.dataset.v === view ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current'));
+  const sold = soldMap();
+  const all = [...products.values()].map(p => ({...p, left: Math.max(0, num(p.qty) - (sold[p.code] || 0))}))
+    .sort((a,b) => a.code < b.code ? -1 : 1);
+  if (view === 'sell') renderSell(all);
+  if (view === 'stock') renderStock(all);
+  if (view === 'sales') renderSales();
+}
+function renderSell(all){
+  const here = sales.filter(s => s.bazaar === curBazaar());
+  $('#sPieces').textContent = here.reduce((a,s) => a + num(s.qty), 0);
+  $('#sRev').textContent = money(here.reduce((a,s) => a + num(s.qty) * num(s.price), 0));
+  const tc = num(tables[curBazaar()]);
+  if (document.activeElement !== $('#tableCost')) $('#tableCost').value = tc || '';
+  const tn = $('#tableNote'), tb = $('#tableBtn'), net = grossOf(here) - tc;
+  const inStock = all.filter(p => p.left > 0), pieces = inStock.reduce((a,p) => a + p.left, 0);
+  const anyAdded = all.some(p => num(p.tableAdd) > 0);
+  tableShare = tc && pieces ? Math.ceil(tc / pieces / 5) * 5 : 0;
+  tableApplied = inStock.length > 0 && inStock.every(p => num(p.tableAdd) > 0);
+  tn.hidden = !tc;
+  if (tc) tn.textContent = (!pieces ? `Table ${money(tc)} EGP. Add your products and you will see how much each piece should carry. `
+      : tableApplied ? `Table ${money(tc)} EGP. A table share of ${money(Math.min(...inStock.map(p => num(p.tableAdd))))} EGP is already inside every price. `
+      : `Table ${money(tc)} EGP ÷ ${pieces} pieces in stock = add ${money(tableShare)} EGP to each piece. `)
+    + (net < 0 ? `${money(-net)} EGP more profit needed to cover it.` : `Covered. Net profit so far: ${money(net)} EGP.`);
+  tb.hidden = !(tableApplied ? anyAdded : tableShare);
+  tb.textContent = tableArmed ? 'Tap again to change the prices' : tableApplied ? 'Take the table share out of the prices' : `Add ${money(tableShare)} EGP to every price`;
+  const q = $('#q').value.trim().toLowerCase();
+  const rows = all.filter(p => p.left > 0 && (!q || p.code.toLowerCase().includes(q) || String(p.name).toLowerCase().includes(q)));
+  const el = $('#sellList');
+  if (!products.size) { el.innerHTML = `<div class="empty"><b>No products yet</b>Open Stock and add your first piece. It gets a label code automatically.</div>`; return; }
+  if (!rows.length) { el.innerHTML = `<div class="empty"><b>${q ? 'Nothing matches' : 'Everything is sold out'}</b>${q ? 'Check the code on the label.' : 'Add new pieces in Stock.'}</div>`; return; }
+  el.innerHTML = rows.map(p => `<div class="item">
+    <div class="info"><div class="nm">${esc(p.name)}</div>
+      <div class="meta">${tagHtml(p.code)}<span>${p.left} left</span></div></div>
+    <div class="price">${money(p.price)}</div>
+    <button class="btn primary small" type="button" data-sell="${esc(p.code)}">Sold</button></div>`).join('');
+}
+function renderStock(all){
+  $('#kLeft').textContent = all.reduce((a,p) => a + p.left, 0);
+  $('#kValue').textContent = money(all.reduce((a,p) => a + p.left * num(p.price), 0));
+  if (document.activeElement !== $('#webFee')) $('#webFee').value = webFee || '';
+  $('#webNote').hidden = !webFee;
+  if (webFee) $('#webNote').textContent = `Each piece shows a “web” price below: your price raised so that after the website takes ${webFee}% you still get your normal price.`;
+  document.querySelectorAll('#stockChips .chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.f === stockFilter));
+  const f = stockFilter;
+  const rows = all.filter(p => f === 'all' || (f === 'in' && p.left > 0) || (f === 'out' && p.left === 0) || p.category === f);
+  const el = $('#stockList');
+  if (!rows.length) { el.innerHTML = `<div class="empty"><b>${products.size ? 'Nothing in this filter' : 'Your stock list is empty'}</b>${products.size ? 'Try another filter.' : 'Tap “Add a product”, then write the code on its label.'}</div>`; return; }
+  el.innerHTML = rows.map(p => `<div class="item ${p.left ? '' : 'out'}">
+    <div class="info"><div class="nm">${esc(p.name)}</div>
+      <div class="meta">${tagHtml(p.code)}
+        <span class="pill ${p.left ? 'in' : 'out'}">${p.left ? p.left + ' of ' + num(p.qty) + ' left' : 'Sold out'}</span>
+        ${p.category === 'handmade' ? '<span class="pill hm">Handmade</span>' : ''}
+        <span>cost ${money(p.cost)}</span>${webPrice(p) ? `<span>web ${money(webPrice(p))}</span>` : ''}</div></div>
+    <div class="price">${money(p.price)}</div>
+    <button class="btn small" type="button" data-edit="${esc(p.code)}">Edit</button></div>`).join('');
+}
+function renderSales(){
+  const names = [...new Set([...sales.map(s => s.bazaar), ...Object.keys(tables).filter(k => num(tables[k]) > 0)])];
+  if (salesFilter !== '__all' && !names.includes(salesFilter)) salesFilter = '__all';
+  const sel = $('#salesFilter');
+  sel.innerHTML = `<option value="__all">All bazaars</option>` + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  sel.value = salesFilter;
+  const rows = sales.filter(s => salesFilter === '__all' || s.bazaar === salesFilter).sort((a,b) => num(b.at) - num(a.at));
+  $('#tPieces').textContent = rows.reduce((a,s) => a + num(s.qty), 0);
+  const rev = rows.reduce((a,s) => a + num(s.qty) * num(s.price), 0);
+  $('#tRev').textContent = money(rev);
+  const gross = grossOf(rows);
+  const tsum = salesFilter === '__all' ? Object.values(tables).reduce((a,v) => a + num(v), 0) : num(tables[salesFilter]);
+  $('#tProfit').textContent = money(gross - tsum);
+  $('#salesNote').hidden = !tsum;
+  if (tsum) $('#salesNote').textContent = `Profit on pieces ${money(gross)} − table ${money(tsum)} = ${money(gross - tsum)} EGP net.`;
+  const net = gross - tsum, capital = rows.reduce((a,s) => a + num(s.qty) * num(s.cost), 0), sp = splitOf(net);
+  $('#lblA').textContent = pA + ' %'; $('#lblB').textContent = pB + ' %';
+  for (const [id, v] of [['pA', pA], ['pB', pB], ['shareA', shareA], ['shareB', 100 - shareA], ['keep', keep]]) if (document.activeElement !== $('#' + id)) $('#' + id).value = v;
+  const line = (label, v) => `<div class="item"><div class="info"><div class="nm">${esc(label)}</div></div><div class="price">${money(v)}</div></div>`;
+  $('#splitList').innerHTML = line('Stock money back to whoever paid it', capital) + line('Net profit after the table', net)
+    + (net > 0 ? line(`Stays in the brand (${keep}%)`, sp.kept) + line(`${pA} (${shareA}%)`, sp.a) + line(`${pB} (${100 - shareA}%)`, sp.b)
+      : `<div class="empty">No profit to split yet.</div>`);
+  const el = $('#salesList');
+  if (!rows.length) { el.innerHTML = `<div class="empty"><b>No sales yet</b>When a piece sells, tap “Sold” next to it on the Sell tab.</div>`; return; }
+  el.innerHTML = rows.map(s => `<div class="item">
+    <div class="info"><div class="nm">${esc(s.name)}${num(s.qty) > 1 ? ' × ' + num(s.qty) : ''}</div>
+      <div class="meta">${tagHtml(s.code)}<span>${esc(s.bazaar)}</span><span>${esc(new Date(num(s.at)).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))}</span></div></div>
+    <div class="price">${money(num(s.qty) * num(s.price))}</div>
+    <button class="btn small" type="button" data-undo="${esc(s.id)}">Undo</button></div>`).join('');
+}
+
+/* ---------- sell ---------- */
+function openSell(code){
+  const p = products.get(code); if (!p) return;
+  const left = Math.max(0, num(p.qty) - (soldMap()[code] || 0)); if (!left) return;
+  selling = {code, left};
+  $('#sellTitle').textContent = p.name;
+  $('#sellMeta').innerHTML = tagHtml(code) + `<span>${left} left · label price ${money(p.price)} EGP</span>`;
+  $('#sellPrice').value = num(p.price);
+  $('#sellQty').value = 1; $('#sellQty').max = left;
+  $('#sellQtyWrap').hidden = left < 2;
+  $('#sellSheet').hidden = false;
+}
+$('#sellForm').addEventListener('submit', async e => {
+  e.preventDefault(); if (!selling || !db) return;
+  const p = products.get(selling.code); if (!p) return;
+  const qty = Math.min(selling.left, Math.max(1, Math.floor(num($('#sellQty').value))));
+  const sale = {code:p.code, name:String(p.name), price:num($('#sellPrice').value), cost:num(p.cost), qty, bazaar:curBazaar(), at:Date.now()};
+  $('#sellGo').disabled = true;
+  const ok = await write(() => db.collection('sales').add(sale), `${p.code} marked sold`);
+  $('#sellGo').disabled = false;
+  if (ok) { $('#sellSheet').hidden = true; selling = null; }
+});
+
+/* ---------- product form ---------- */
+function setCat(c){ formCat = c; document.querySelectorAll('#catSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === c)); refreshCode(); }
+function refreshCode(){ $('#pCode').textContent = editing || nextCode(formCat, $('#pType').value); }
+function openProd(code){
+  editing = code || null; armed = false;
+  const p = code ? products.get(code) : null;
+  $('#prodTitle').textContent = p ? 'Edit product' : 'Add a product';
+  $('#pName').value = p ? p.name : '';
+  $('#pCost').value = p ? num(p.costPiece ?? p.cost) : '';
+  $('#pBag').value = p ? (num(p.costBag) || '') : (mem.get('bag') ?? '10');
+  $('#pClasp').value = p ? (num(p.costClasp) || '') : (mem.get('clasp') ?? '10');
+  $('#pExtra').value = p ? (num(p.extra) || '') : (mem.get('extra') ?? '30');
+  $('#pMul').value = p ? (num(p.markup) || 2) : (num(mem.get('mul')) || 2);
+  $('#pPrice').value = p ? num(p.price) : '';
+  priceTouched = !!p && num(p.price) !== Math.round(num(p.cost) * (num(p.markup) || 2) + num(p.extra) + num(p.tableAdd));
+  calc();
+  $('#pQty').value = p ? num(p.qty) : 1;
+  $('#pType').value = p && TYPES[p.type] ? p.type : 'necklace';
+  $('#pType').disabled = !!p;
+  document.querySelectorAll('#catSeg button').forEach(b => b.disabled = !!p);
+  $('#prodDel').hidden = !p; $('#prodDel').textContent = 'Delete this product';
+  setCat(p ? p.category : formCat);
+  $('#prodSheet').hidden = false;
+}
+$('#catSeg').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if (b && !b.disabled) setCat(b.dataset.cat); });
+$('#pType').addEventListener('change', refreshCode);
+function calc(){
+  const piece = num($('#pCost').value), extra = num($('#pBag').value) + num($('#pClasp').value), tot = piece + extra;
+  const mul = num($('#pMul').value) || 2;
+  const tAdd = editing ? num((products.get(editing) || {}).tableAdd) : 0;
+  const top = num($('#pExtra').value);
+  if (!priceTouched) $('#pPrice').value = piece ? Math.round(tot * mul + top + tAdd) : '';
+  const pr = num($('#pPrice').value);
+  $('#pCalc').textContent = `Price = (cost + bag + clasp) × ${mul} + ${money(top)} extra${tAdd ? ' + ' + money(tAdd) + ' table share' : ''}. It costs you ${money(tot)} EGP` + (pr ? `, so you earn ${money(pr - tot)} EGP on each one.` : '.');
+  return tot;
+}
+for (const id of ['pCost','pBag','pClasp','pExtra']) $('#' + id).addEventListener('input', calc);
+$('#pMul').addEventListener('input', () => { priceTouched = false; calc(); });
+$('#pPrice').addEventListener('input', () => { priceTouched = true; calc(); });
+$('#prodForm').addEventListener('submit', async e => {
+  e.preventDefault(); if (!db) return;
+  const code = editing || nextCode(formCat, $('#pType').value);
+  const old = editing ? products.get(editing) : null;
+  const body = {code, name:$('#pName').value.trim(), category: old ? old.category : formCat, type: old ? old.type : $('#pType').value,
+    costPiece:num($('#pCost').value), costBag:num($('#pBag').value), costClasp:num($('#pClasp').value), cost:calc(),
+    markup:num($('#pMul').value) || 2, extra:num($('#pExtra').value), tableAdd: old ? num(old.tableAdd) : 0, price:num($('#pPrice').value), qty:Math.max(1, Math.floor(num($('#pQty').value))), createdAt: old ? num(old.createdAt) : Date.now()};
+  if (!body.name) return;
+  $('#prodGo').disabled = true;
+  const ok = await write(() => db.collection('products').doc(code).set(body), editing ? 'Saved' : `Added. Write ${code} on the label`);
+  $('#prodGo').disabled = false;
+  if (ok) { mem.set('bag', $('#pBag').value); mem.set('clasp', $('#pClasp').value); mem.set('mul', $('#pMul').value); mem.set('extra', $('#pExtra').value); $('#prodSheet').hidden = true; editing = null; }
+});
+let armed = false;
+$('#prodDel').addEventListener('click', async () => {
+  if (!editing || !db) return;
+  if (!armed) { armed = true; $('#prodDel').textContent = 'Tap again to delete for good'; return; }
+  const code = editing;
+  if (await write(() => db.collection('products').doc(code).delete(), 'Deleted')) { $('#prodSheet').hidden = true; editing = null; }
+});
+
+/* ---------- events ---------- */
+document.addEventListener('click', async e => {
+  const t = e.target;
+  if (t.closest('[data-close]') || t.classList.contains('scrim')) { $('#sellSheet').hidden = true; $('#prodSheet').hidden = true; return; }
+  const nav = t.closest('#nav [data-v]'); if (nav) { view = nav.dataset.v; render(); window.scrollTo(0,0); return; }
+  const chip = t.closest('#stockChips [data-f]'); if (chip) { stockFilter = chip.dataset.f; render(); return; }
+  const s = t.closest('[data-sell]'); if (s) return openSell(s.dataset.sell);
+  const ed = t.closest('[data-edit]'); if (ed) return openProd(ed.dataset.edit);
+  const u = t.closest('[data-undo]');
+  if (u && db) {
+    if (u.dataset.armed !== '1') { u.dataset.armed = '1'; u.textContent = 'Sure?'; return; }
+    u.disabled = true; await write(() => db.collection('sales').doc(u.dataset.undo).delete(), 'Sale removed, piece is back in stock');
+  }
+});
+$('#addBtn').addEventListener('click', () => openProd(null));
+$('#q').addEventListener('input', render);
+$('#salesFilter').addEventListener('change', e => { salesFilter = e.target.value; render(); });
+$('#bazaar').addEventListener('change', e => {
+  bazaar = e.target.value.trim(); render();
+  if (db) write(() => db.doc('meta/settings').set(settingsBody()), 'Bazaar name saved');
+});
+$('#webFee').addEventListener('change', e => {
+  webFee = Math.min(90, Math.max(0, num(e.target.value))); render();
+  if (db) write(() => db.doc('meta/settings').set(settingsBody()), 'Website fee saved');
+});
+for (const id of ['pA', 'pB', 'shareA', 'shareB', 'keep']) $('#' + id).addEventListener('change', ev => {
+  if (ev.target.id === 'shareB') $('#shareA').value = 100 - Math.min(100, Math.max(0, num($('#shareB').value)));
+  pA = $('#pA').value.trim() || 'Partner 1'; pB = $('#pB').value.trim() || 'Partner 2';
+  shareA = Math.min(100, Math.max(0, num($('#shareA').value))); keep = Math.min(90, Math.max(0, num($('#keep').value)));
+  render();
+  if (db) write(() => db.doc('meta/settings').set(settingsBody()), 'Partner split saved');
+});
+$('#tableBtn').addEventListener('click', async e => {
+  if (!db) return;
+  if (!tableArmed) { tableArmed = true; render(); return; }
+  tableArmed = false;
+  const btn = e.currentTarget, remove = tableApplied, share = tableShare, sold = soldMap();
+  btn.disabled = true;
+  let n = 0, ok = true;
+  for (const p of [...products.values()]) {
+    const cur = num(p.tableAdd), left = num(p.qty) - (sold[p.code] || 0);
+    const next = remove ? 0 : (left > 0 ? share : cur);
+    if (next === cur) continue;
+    const body = {...p, price: num(p.price) - cur + next, tableAdd: next};
+    ok = await write(() => db.collection('products').doc(p.code).set(body));
+    if (!ok) break;
+    n++;
+  }
+  btn.disabled = false; render();
+  if (ok) toast(remove ? `Table share removed from ${n} prices` : `${n} prices went up by the table share`);
+});
+$('#tableCost').addEventListener('change', e => {
+  tables = {...tables, [curBazaar()]: num(e.target.value)}; render();
+  const body = tables;
+  if (db) write(() => db.doc('meta/tables').set(body), 'Table cost saved');
+});
+
+/* ---------- export ---------- */
+$('#exportBtn').addEventListener('click', async () => {
+  if (!downloads || !window.ExcelJS) { toast('Excel export is not ready. Reload the page and try again.'); return; }
+  const sold = soldMap();
+  const ps = [...products.values()].sort((a,b) => a.code < b.code ? -1 : 1);
+  const A = [['Code','Name','Category','Type','Piece cost','Bag','Clasp','Total cost','Price','Pieces in','Sold','Left','Stock value','Website price']];
+  const L = [['Code','Name','Price']];
+  for (const p of ps) {
+    const s = sold[p.code] || 0, left = Math.max(0, num(p.qty) - s);
+    A.push([p.code, p.name, p.category, (TYPES[p.type] || ['',''])[1], num(p.costPiece ?? p.cost), num(p.costBag), num(p.costClasp), num(p.cost), num(p.price), num(p.qty), s, left, left * num(p.price), webPrice(p) || '']);
+    for (let i = 0; i < left; i++) L.push([p.code, p.name, num(p.price)]);
+  }
+  const S = [['Date','Bazaar','Code','Name','Qty','Price each','Total','Cost each','Profit']];
+  const byB = {};
+  for (const s of [...sales].sort((a,b) => num(a.at) - num(b.at))) {
+    const tot = num(s.qty) * num(s.price), prof = tot - num(s.qty) * num(s.cost);
+    S.push([new Date(num(s.at) - new Date(num(s.at)).getTimezoneOffset() * 60000),s.bazaar, s.code, s.name, num(s.qty), num(s.price), tot, num(s.cost), prof]);
+    const b = byB[s.bazaar] || (byB[s.bazaar] = [0,0,0]); b[0] += num(s.qty); b[1] += tot; b[2] += prof;
+  }
+  for (const k of Object.keys(tables)) if (num(tables[k]) > 0 && !byB[k]) byB[k] = [0,0,0];
+  const B = [['Bazaar','Pieces','Revenue','Profit on pieces','Table cost','Net profit','Stays in brand',pA,pB], ...Object.entries(byB).map(([k,v]) => { const n = v[2] - num(tables[k]), sp = splitOf(n); return [k, ...v, num(tables[k]), n, sp.kept, sp.a, sp.b]; })];
+  const wb = new ExcelJS.Workbook();
+  const TEAL = 'FF457373', DARK = 'FF2C4A4A', SAND = 'FFFBECEA', CREAM = 'FFFFFFFF', STAR = 'FFFDF5F4', FONT = 'Century Gothic';
+  const fill = c => ({type:'pattern', pattern:'solid', fgColor:{argb:c}});
+  const stamp = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+  const add = (rows, name, widths, sums) => {
+    const n = widths.length;
+    const ws = wb.addWorksheet(name, {properties:{tabColor:{argb:TEAL}}, views:[{state:'frozen', ySplit:3, showGridLines:false}]});
+    ws.columns = widths.map(w => ({width:w + 4}));
+    ws.addRow(['em.em  ✦  ' + name]); ws.addRow(['two souls, one design  ·  ' + stamp]);
+    ws.mergeCells(1, 1, 1, n); ws.mergeCells(2, 1, 2, n);
+    ws.getRow(1).height = 38; ws.getRow(2).height = 22;
+    ws.getCell(1, 1).font = {name:FONT, size:18, color:{argb:TEAL}};
+    ws.getCell(2, 1).font = {name:FONT, size:9, color:{argb:DARK}};
+    for (const r of [1, 2]) { ws.getCell(r, 1).fill = fill(SAND); ws.getCell(r, 1).alignment = {vertical:'middle', indent:1}; }
+    const body = rows.slice();
+    if (sums && rows.length > 1) {
+      const t = new Array(n).fill(''); t[0] = 'Total';
+      for (const c of sums) t[c - 1] = rows.slice(1).reduce((a, r) => a + num(r[c - 1]), 0);
+      body.push(t);
+    }
+    body.forEach((r, i) => {
+      const head = i === 0, total = !!sums && rows.length > 1 && i === body.length - 1;
+      const row = ws.addRow(r); row.height = head ? 28 : 23;
+      for (let c = 1; c <= n; c++) {
+        const cell = row.getCell(c), v = r[c - 1];
+        cell.alignment = {vertical:'middle', horizontal: typeof v === 'number' ? 'right' : 'left', indent:1};
+        if (typeof v === 'number') cell.numFmt = '#,##0';
+        if (v instanceof Date) cell.numFmt = 'd mmm yyyy, hh:mm';
+        if (head) { cell.fill = fill(TEAL); cell.font = {name:FONT, size:10, bold:true, color:{argb:CREAM}}; }
+        else if (total) { cell.fill = fill(SAND); cell.font = {name:FONT, size:10, bold:true, color:{argb:TEAL}}; cell.border = {top:{style:'medium', color:{argb:TEAL}}}; }
+        else { cell.fill = fill(i % 2 ? CREAM : STAR); cell.font = {name:FONT, size:10, bold:c === 1, color:{argb:c === 1 ? TEAL : DARK}}; cell.border = {bottom:{style:'thin', color:{argb:SAND}}}; }
+      }
+    });
+  };
+  add(A, 'Products', [9,30,12,12,11,8,8,11,9,10,7,7,12,13], [10,11,12,13]);
+  add(S, 'Sales', [20,28,9,30,6,11,10,10,10], [5,7,9]);
+  add(B, 'Bazaars', [30,9,12,16,12,12,14,14,14], [2,3,4,5,6,7,8,9]);
+  add(L, 'Labels', [10,30,10]);
+  let data;
+  try { data = await wb.xlsx.writeBuffer(); } catch (e) { toast('Could not build the Excel file.'); return; }
+  downloads.save({filename:'emem-stock-' + new Date().toISOString().slice(0,10) + '.xlsx', data})
+    .then(() => toast('Excel file saved'))
+    .catch(err => { if (!err || err.code !== 'declined') toast('Could not save the file here. Open this page in a browser.'); });
+});
+
+/* ---------- boot (standalone site: Firebase) ---------- */
+(function start(){
+  const cfg = window.EMEM_CONFIG;
+  if (!cfg || !cfg.apiKey || !window.firebase) { $('#status').textContent = 'Setup is not finished yet: the Firebase settings are missing.'; return; }
+  firebase.initializeApp(cfg);
+  const auth = firebase.auth();
+  downloads = { save: async ({filename, data}) => {
+    const url = URL.createObjectURL(new Blob([data], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+    const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } };
+  const authMsg = e => ({'auth/invalid-credential':'Wrong email or password.','auth/invalid-login-credentials':'Wrong email or password.','auth/wrong-password':'Wrong email or password.','auth/user-not-found':'No password for this email yet. Tap “Create my password”.','auth/email-already-in-use':'This email already has a password. Tap “Sign in”.','auth/weak-password':'Use at least 6 characters.','auth/invalid-email':'That email does not look right.','auth/too-many-requests':'Too many tries. Wait a few minutes.','auth/network-request-failed':'No internet connection.'}[e && e.code] || 'That did not work. Try again.');
+  const creds = () => [$('#auEmail').value.trim(), $('#auPass').value];
+  $('#gate').addEventListener('submit', e => { e.preventDefault(); const [em, pw] = creds(); auth.signInWithEmailAndPassword(em, pw).catch(er => toast(authMsg(er))); });
+  $('#signUp').addEventListener('click', () => { const [em, pw] = creds();
+    if (!em || pw.length < 6) { toast('Type your email and a password of at least 6 characters.'); return; }
+    auth.createUserWithEmailAndPassword(em, pw).then(c => c.user.sendEmailVerification()).catch(er => toast(authMsg(er))); });
+  $('#forgot').addEventListener('click', () => { const [em] = creds(); if (!em) { toast('Type your email first.'); return; }
+    auth.sendPasswordResetEmail(em).then(() => toast('Password reset email sent.')).catch(er => toast(authMsg(er))); });
+  $('#resend').addEventListener('click', () => { if (auth.currentUser) auth.currentUser.sendEmailVerification().then(() => toast('Sent again. Check Junk too.')).catch(er => toast(authMsg(er))); });
+  $('#verified').addEventListener('click', async () => { const u = auth.currentUser; if (!u) return;
+    try { await u.reload(); if (!auth.currentUser.emailVerified) { toast('Not confirmed yet. Click the link in the email first.'); return; } await auth.currentUser.getIdToken(true); location.reload(); }
+    catch (er) { toast(authMsg(er)); } });
+  $('#signOut').addEventListener('click', () => auth.signOut().then(() => location.reload()));
+  let started = false;
+  auth.onAuthStateChanged(user => {
+    $('#gate').hidden = !!user; $('#signOut').hidden = !user; $('#verify').hidden = !(user && !user.emailVerified);
+    if (!user) { $('#status').hidden = true; return; }
+    if (!user.emailVerified) { $('#status').hidden = true; $('#verifyMsg').textContent = 'We sent a link to ' + user.email + '. Open it, then come back here. Look in Junk if you do not see it.'; return; }
+    if (started) return; started = true;
+    $('#status').hidden = false; $('#status').textContent = 'Loading your products…';
+    db = firebase.firestore();
+    try { db.settings({ignoreUndefinedProperties:true}); } catch(e) {}
+    db.enablePersistence({synchronizeTabs:true}).catch(() => {});
+    const fail = () => { $('#status').hidden = false; $('#nav').hidden = true; for (const v of ['sell','stock','sales']) $('#v-' + v).hidden = true;
+      $('#status').textContent = 'This Google account (' + (user.email || '') + ') is not on the allowed list. Sign out and use a partner account.'; };
+    db.collection('products').onSnapshot(snap => {
+      products = new Map(snap.docs.map(d => { const x = d.data() || {}; return [d.id, {...x, code:d.id}]; }));
+      ready.p = true; render();
+    }, fail);
+    db.collection('sales').onSnapshot(snap => {
+      sales = snap.docs.map(d => ({...(d.data() || {}), id:d.id})).map(s => ({...s, bazaar: String(s.bazaar || NO_BAZAAR), code: String(s.code || '')}));
+      ready.s = true; render();
+    }, fail);
+    db.doc('meta/settings').onSnapshot(snap => {
+      const st = snap.exists ? (snap.data() || {}) : {};
+      webFee = num(st.webFee);
+      if (st.pA) pA = String(st.pA); if (st.pB) pB = String(st.pB);
+      if (st.shareA != null) shareA = num(st.shareA); if (st.keep != null) keep = num(st.keep);
+      bazaar = String(st.bazaar || ''); if (document.activeElement !== $('#bazaar')) $('#bazaar').value = bazaar; render();
+    }, () => {});
+    db.doc('meta/tables').onSnapshot(snap => { tables = snap.exists ? {...(snap.data() || {})} : {}; render(); }, () => {});
+  });
+})();
+})();
+</script>
+</body></html>
