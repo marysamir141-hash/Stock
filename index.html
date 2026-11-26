@@ -135,6 +135,8 @@ input,select{border-radius:14px}
 .nav button{border-top:0;margin:0;border-radius:999px;padding:12px 4px;text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:500}
 .nav button[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
 .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+.chk{flex:none;width:22px;height:22px;min-height:0;padding:0;accent-color:var(--accent);pointer-events:none}
+.item[data-pick]{cursor:pointer}
 </style>
 
 <div class="deco" aria-hidden="true"><i></i><i></i></div>
@@ -196,10 +198,16 @@ input,select{border-radius:14px}
       <button class="chip" type="button" data-f="out" aria-pressed="false">Sold out</button>
       <button class="chip" type="button" data-f="stainless" aria-pressed="false">Stainless</button>
       <button class="chip" type="button" data-f="handmade" aria-pressed="false">Handmade</button>
+      <button class="chip" type="button" id="selToggle" aria-pressed="false">Select several</button>
     </div>
     <div class="stats">
       <div class="stat"><b id="kLeft">0</b><span>Pieces left</span></div>
       <div class="stat"><b id="kValue">0</b><span>EGP stock value</span></div>
+    </div>
+    <div class="row" id="selBar" hidden>
+      <button class="btn small" id="selAll" type="button">Select all</button>
+      <button class="btn small danger" id="selDel" type="button">Delete 0</button>
+      <button class="btn small" id="selDone" type="button">Done</button>
     </div>
     <div class="list" id="stockList"></div>
   </section>
@@ -285,6 +293,7 @@ input,select{border-radius:14px}
 <!-- Import sheet -->
 <div class="scrim" id="importSheet" hidden><div class="sheet">
   <h2 id="importTitle">Import</h2>
+  <label class="field" id="importPickWrap" hidden><span>Which sheet</span><select id="importPick"></select></label>
   <div class="note" id="importInfo"></div>
   <div class="list" id="importList"></div>
   <div class="row">
@@ -316,6 +325,7 @@ let selling = null, editing = null, formCat = 'stainless';
 let ready = {p:false, s:false};
 let tables = {}, priceTouched = false, tableShare = 0, tableApplied = false, tableArmed = false;
 const mem = { get(k){ try { return localStorage.getItem('emem.' + k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem('emem.' + k, v); } catch(e){} } };
+let selectMode = false, selArmed = false, shownCodes = []; const selected = new Set();
 let webFee = 0, pA = 'Partner 1', pB = 'Partner 2', shareA = 50, keep = 30;
 const settingsBody = () => ({bazaar, webFee, pA, pB, shareA, keep});
 const splitOf = net => { const kept = net > 0 ? Math.round(net * keep / 100) : 0, pool = Math.max(0, net - kept), a = Math.round(pool * shareA / 100); return {kept, a, b: pool - a}; };
@@ -400,17 +410,22 @@ function renderStock(all){
   document.querySelectorAll('#stockChips .chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.f === stockFilter));
   const f = stockFilter;
   const rows = all.filter(p => f === 'all' || (f === 'in' && p.left > 0) || (f === 'out' && p.left === 0) || p.category === f);
+  shownCodes = rows.map(p => p.code);
+  for (const c of [...selected]) if (!products.has(c)) selected.delete(c);
+  $('#selToggle').setAttribute('aria-pressed', selectMode); $('#selBar').hidden = !selectMode;
+  $('#selDel').textContent = selArmed ? `Tap again to delete ${selected.size} for good` : `Delete ${selected.size}`; $('#selDel').disabled = !selected.size;
   const el = $('#stockList');
   if (!rows.length) { el.innerHTML = `<div class="empty"><b>${products.size ? 'Nothing in this filter' : 'Your stock list is empty'}</b>${products.size ? 'Try another filter.' : 'Tap “Add a product”, then write the code on its label.'}</div>`; return; }
-  el.innerHTML = rows.map(p => `<div class="item ${p.left ? '' : 'out'}">
+  el.innerHTML = rows.map(p => `<div class="item ${p.left ? '' : 'out'}" ${selectMode ? `data-pick="${esc(p.code)}"` : ''}>
+    ${selectMode ? `<input class="chk" type="checkbox" tabindex="-1" aria-label="Select ${esc(p.code)}" ${selected.has(p.code) ? 'checked' : ''}>` : ''}
     <div class="info"><div class="nm">${esc(p.name)}</div>
       <div class="meta">${tagHtml(p.code)}
         <span class="pill ${p.left ? 'in' : 'out'}">${p.left ? p.left + ' of ' + num(p.qty) + ' left' : 'Sold out'}</span>
         ${p.category === 'handmade' ? '<span class="pill hm">Handmade</span>' : ''}
         <span>cost ${money(p.cost)}</span>${webPrice(p) ? `<span>web ${money(webPrice(p))}</span>` : ''}</div></div>
     <div class="price">${money(p.price)}</div>
-    <button class="btn small" type="button" data-plus="${esc(p.code)}" aria-label="Add one more piece">+1</button>
-    <button class="btn small" type="button" data-edit="${esc(p.code)}">Edit</button></div>`).join('');
+    ${selectMode ? '' : `<button class="btn small" type="button" data-plus="${esc(p.code)}" aria-label="Add one more piece">+1</button>
+    <button class="btn small" type="button" data-edit="${esc(p.code)}">Edit</button>`}</div>`).join('');
 }
 function renderSales(){
   const names = [...new Set([...sales.map(s => s.bazaar), ...Object.keys(tables).filter(k => num(tables[k]) > 0)])];
@@ -539,6 +554,7 @@ $('#prodDel').addEventListener('click', async () => {
 document.addEventListener('click', async e => {
   const t = e.target;
   if (t.closest('[data-close]') || t.classList.contains('scrim')) { $('#sellSheet').hidden = true; $('#prodSheet').hidden = true; $('#importSheet').hidden = true; return; }
+  const pk = t.closest('[data-pick]'); if (pk) { const c = pk.dataset.pick; selected.has(c) ? selected.delete(c) : selected.add(c); selArmed = false; render(); return; }
   const nav = t.closest('#nav [data-v]'); if (nav) { view = nav.dataset.v; render(); window.scrollTo(0,0); return; }
   const chip = t.closest('#stockChips [data-f]'); if (chip) { stockFilter = chip.dataset.f; render(); return; }
   const s = t.closest('[data-sell]'); if (s) return openSell(s.dataset.sell);
@@ -554,6 +570,18 @@ document.addEventListener('click', async e => {
   }
 });
 $('#addBtn').addEventListener('click', () => openProd(null));
+$('#selToggle').addEventListener('click', () => { selectMode = !selectMode; selected.clear(); selArmed = false; render(); });
+$('#selDone').addEventListener('click', () => { selectMode = false; selected.clear(); selArmed = false; render(); });
+$('#selAll').addEventListener('click', () => { const all = shownCodes.every(c => selected.has(c)); for (const c of shownCodes) all ? selected.delete(c) : selected.add(c); selArmed = false; render(); });
+$('#selDel').addEventListener('click', async () => {
+  if (!db || !selected.size) return;
+  if (!selArmed) { selArmed = true; render(); return; }
+  selArmed = false; const codes = [...selected], btn = $('#selDel'); btn.disabled = true;
+  let n = 0;
+  for (const c of codes) { if (!await write(() => db.collection('products').doc(c).delete())) break; selected.delete(c); n++; }
+  selectMode = selected.size > 0; render();
+  toast(n === codes.length ? `${n} products deleted` : `${n} of ${codes.length} deleted, then the connection failed.`);
+});
 $('#q').addEventListener('input', render);
 $('#salesFilter').addEventListener('change', e => { salesFilter = e.target.value; render(); });
 $('#bazaarSel').addEventListener('change', e => {
@@ -608,13 +636,11 @@ $('#tableCost').addEventListener('change', e => {
 
 /* ---------- import an old sheet (code + final price) ---------- */
 const cellText = v => v == null ? '' : typeof v === 'object' ? (v.result != null ? String(v.result) : v.richText ? v.richText.map(t => t.text).join('') : v.text != null ? String(v.text) : '') : String(v);
-async function readRows(file){
+async function readSheets(file){
   const buf = await file.arrayBuffer();
-  if (/\.csv$/i.test(file.name)) return new TextDecoder().decode(buf).split(/\r?\n/).map(l => l.split(/[,;\t]/).map(c => c.trim().replace(/^"|"$/g, '')));
+  if (/\.csv$/i.test(file.name)) return [{name:'CSV', rows:new TextDecoder().decode(buf).split(/\r?\n/).map(l => l.split(/[,;\t]/).map(c => c.trim().replace(/^"|"$/g, '')))}];
   const wb = new ExcelJS.Workbook(); await wb.xlsx.load(buf);
-  const out = [], ws = wb.worksheets[0];
-  if (ws) ws.eachRow(r => out.push((r.values || []).slice(1).map(cellText)));
-  return out;
+  return wb.worksheets.map(ws => { const rows = []; ws.eachRow(r => rows.push((r.values || []).slice(1).map(cellText))); return {name:ws.name, rows}; });
 }
 function pickRows(rows){
   let start = 0, ci = 0, pi = 1, ni = -1, qi = -1;
@@ -634,22 +660,32 @@ function pickRows(rows){
   }
   return out;
 }
-let importRows = [];
+let importRows = [], importSheets = [];
+function showImport(i){
+  const sh = importSheets[i]; if (!sh) return;
+  importRows = sh.found.filter(r => !products.has(r.code));
+  const skipped = sh.found.length - importRows.length;
+  $('#importTitle').textContent = `${importRows.length} products to import`;
+  $('#importInfo').textContent = !sh.found.length ? 'This sheet has no rows with a code and a price. Pick another sheet.'
+    : (skipped ? `${skipped} codes are already in your stock and will be left as they are. ` : '') + 'Each one comes in with its code and price, 1 piece, and cost 0. Open Edit on a product afterwards to add its name, cost and quantity.';
+  $('#importList').innerHTML = importRows.slice(0, 6).map(r => `<div class="item"><div class="info"><div class="nm">${esc(r.name || r.code)}</div><div class="meta">${tagHtml(r.code)}<span>${r.qty} piece${r.qty > 1 ? 's' : ''}</span></div></div><div class="price">${money(r.price)}</div></div>`).join('')
+    + (importRows.length > 6 ? `<div class="empty">and ${importRows.length - 6} more</div>` : '');
+  $('#importList').hidden = !importRows.length;
+  $('#importGo').disabled = !importRows.length; $('#importGo').textContent = 'Import them';
+}
 $('#importBtn').addEventListener('click', () => $('#importFile').click());
+$('#importPick').addEventListener('change', e => showImport(Number(e.target.value)));
 $('#importFile').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   if (/\.xls$/i.test(f.name)) { toast('Old .xls files do not open here. Open it in Excel and save it as .xlsx.'); return; }
   if (!window.ExcelJS && !/\.csv$/i.test(f.name)) { toast('The Excel reader did not load. Reload the page and try again.'); return; }
-  let all;
-  try { all = pickRows(await readRows(f)); } catch (err) { toast('Could not read this file. Save it as .xlsx and try again.'); return; }
-  if (!all.length) { toast('No rows with a code and a price were found in the first sheet.'); return; }
-  importRows = all.filter(r => !products.has(r.code));
-  const skipped = all.length - importRows.length;
-  $('#importTitle').textContent = `${importRows.length} products to import`;
-  $('#importInfo').textContent = (skipped ? `${skipped} codes are already in your stock and will be left as they are. ` : '') + 'Each one comes in with its code and price, 1 piece, and cost 0. Open Edit on a product afterwards to add its name, cost and quantity.';
-  $('#importList').innerHTML = importRows.slice(0, 6).map(r => `<div class="item"><div class="info"><div class="nm">${esc(r.name || r.code)}</div><div class="meta">${tagHtml(r.code)}<span>${r.qty} piece${r.qty > 1 ? 's' : ''}</span></div></div><div class="price">${money(r.price)}</div></div>`).join('')
-    + (importRows.length > 6 ? `<div class="empty">and ${importRows.length - 6} more</div>` : '');
-  $('#importGo').disabled = !importRows.length; $('#importGo').textContent = 'Import them';
+  try { importSheets = (await readSheets(f)).map(sh => ({...sh, found: pickRows(sh.rows)})); } catch (err) { toast('Could not read this file. Save it as .xlsx and try again.'); return; }
+  if (!importSheets.some(sh => sh.found.length)) { toast('No rows with a code and a price were found in this file.'); return; }
+  let best = 0; importSheets.forEach((sh, i) => { if (sh.found.length > importSheets[best].found.length) best = i; });
+  $('#importPickWrap').hidden = importSheets.length < 2;
+  $('#importPick').innerHTML = importSheets.map((sh, i) => `<option value="${i}">${esc(sh.name)} (${sh.found.length} products)</option>`).join('');
+  $('#importPick').value = String(best);
+  showImport(best);
   $('#importSheet').hidden = false;
 });
 $('#importGo').addEventListener('click', async () => {
