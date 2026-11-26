@@ -162,9 +162,14 @@ input,select{border-radius:14px}
   <section id="v-sell" class="view" hidden>
     <div class="row">
       <label class="field" style="flex:2"><span>Bazaar you are at now</span>
-        <input id="bazaar" type="text" placeholder="e.g. Zamalek Bazaar" autocomplete="off"></label>
+        <select id="bazaarSel"></select></label>
       <label class="field"><span>Table cost</span>
         <input id="tableCost" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
+    </div>
+    <div class="row" id="newBazaarRow" hidden>
+      <label class="field" style="flex:2"><span>New bazaar name</span>
+        <input id="bazaar" type="text" placeholder="e.g. Zamalek Bazaar" autocomplete="off"></label>
+      <button class="btn primary" id="bazaarAdd" type="button" style="align-self:flex-end">Add</button>
     </div>
     <div class="stats">
       <div class="stat"><b id="sPieces">0</b><span>Pieces sold</span></div>
@@ -180,6 +185,8 @@ input,select{border-radius:14px}
   <!-- STOCK -->
   <section id="v-stock" class="view" hidden>
     <button class="btn primary block" id="addBtn" type="button">Add a product</button>
+    <button class="btn block" id="importBtn" type="button">Import my old Excel sheet</button>
+    <input id="importFile" type="file" accept=".xlsx,.csv" hidden>
     <label class="field"><span>Website takes (% of each sale)</span>
       <input id="webFee" type="number" inputmode="decimal" min="0" max="90" step="any" placeholder="0"></label>
     <div class="note" id="webNote" hidden></div>
@@ -271,8 +278,20 @@ input,select{border-radius:14px}
     <button class="btn" type="button" data-close>Cancel</button>
     <button class="btn primary" type="submit" id="prodGo">Save product</button>
   </div>
+  <button class="btn block" type="button" id="prodCopy" hidden>Copy as a new product</button>
   <button class="btn danger block" type="button" id="prodDel" hidden>Delete this product</button>
 </form></div>
+
+<!-- Import sheet -->
+<div class="scrim" id="importSheet" hidden><div class="sheet">
+  <h2 id="importTitle">Import</h2>
+  <div class="note" id="importInfo"></div>
+  <div class="list" id="importList"></div>
+  <div class="row">
+    <button class="btn" type="button" data-close>Cancel</button>
+    <button class="btn primary" type="button" id="importGo">Import them</button>
+  </div>
+</div></div>
 
 <div class="toast" id="toast" hidden></div>
 
@@ -301,6 +320,7 @@ let webFee = 0, pA = 'Partner 1', pB = 'Partner 2', shareA = 50, keep = 30;
 const settingsBody = () => ({bazaar, webFee, pA, pB, shareA, keep});
 const splitOf = net => { const kept = net > 0 ? Math.round(net * keep / 100) : 0, pool = Math.max(0, net - kept), a = Math.round(pool * shareA / 100); return {kept, a, b: pool - a}; };
 const webPrice = p => webFee > 0 && webFee < 100 ? Math.ceil((num(p.price) - num(p.tableAdd)) / (1 - webFee / 100) / 5) * 5 : 0;
+const allBazaars = () => [...new Set([...Object.keys(tables), ...sales.map(s => s.bazaar)])].filter(n => n && n !== NO_BAZAAR);
 const grossOf = rows => rows.reduce((a,s) => a + num(s.qty) * (num(s.price) - num(s.cost)), 0);
 
 $('#pType').innerHTML = Object.entries(TYPES).map(([k,v]) => `<option value="${k}">${v[1]}</option>`).join('');
@@ -340,6 +360,12 @@ function renderSell(all){
   const here = sales.filter(s => s.bazaar === curBazaar());
   $('#sPieces').textContent = here.reduce((a,s) => a + num(s.qty), 0);
   $('#sRev').textContent = money(here.reduce((a,s) => a + num(s.qty) * num(s.price), 0));
+  const bs = $('#bazaarSel'), names = allBazaars();
+  if (bazaar && !names.includes(bazaar)) names.push(bazaar);
+  if (document.activeElement !== bs) {
+    bs.innerHTML = (bazaar ? '' : '<option value="">Choose a bazaar</option>') + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('') + '<option value="__new">+ New bazaar…</option>';
+    bs.value = $('#newBazaarRow').hidden ? bazaar : '__new';
+  }
   const tc = num(tables[curBazaar()]);
   if (document.activeElement !== $('#tableCost')) $('#tableCost').value = tc || '';
   const tn = $('#tableNote'), tb = $('#tableBtn'), net = grossOf(here) - tc;
@@ -383,6 +409,7 @@ function renderStock(all){
         ${p.category === 'handmade' ? '<span class="pill hm">Handmade</span>' : ''}
         <span>cost ${money(p.cost)}</span>${webPrice(p) ? `<span>web ${money(webPrice(p))}</span>` : ''}</div></div>
     <div class="price">${money(p.price)}</div>
+    <button class="btn small" type="button" data-plus="${esc(p.code)}" aria-label="Add one more piece">+1</button>
     <button class="btn small" type="button" data-edit="${esc(p.code)}">Edit</button></div>`).join('');
 }
 function renderSales(){
@@ -458,8 +485,7 @@ function openProd(code){
   $('#pQty').value = p ? num(p.qty) : 1;
   $('#pType').value = p && TYPES[p.type] ? p.type : 'necklace';
   $('#pType').disabled = !!p;
-  document.querySelectorAll('#catSeg button').forEach(b => b.disabled = !!p);
-  $('#prodDel').hidden = !p; $('#prodDel').textContent = 'Delete this product';
+  $('#prodDel').hidden = !p; $('#prodDel').textContent = 'Delete this product'; $('#prodCopy').hidden = !p;
   setCat(p ? p.category : formCat);
   $('#prodSheet').hidden = false;
 }
@@ -482,7 +508,7 @@ $('#prodForm').addEventListener('submit', async e => {
   e.preventDefault(); if (!db) return;
   const code = editing || nextCode(formCat, $('#pType').value);
   const old = editing ? products.get(editing) : null;
-  const body = {code, name:$('#pName').value.trim(), category: old ? old.category : formCat, type: old ? old.type : $('#pType').value,
+  const body = {code, name:$('#pName').value.trim(), category: formCat, type: old ? old.type : $('#pType').value,
     costPiece:num($('#pCost').value), costBag:num($('#pBag').value), costClasp:num($('#pClasp').value), cost:calc(),
     markup:num($('#pMul').value) || 2, extra:num($('#pExtra').value), tableAdd: old ? num(old.tableAdd) : 0, price:num($('#pPrice').value), qty:Math.max(1, Math.floor(num($('#pQty').value))), createdAt: old ? num(old.createdAt) : Date.now()};
   if (!body.name) return;
@@ -490,6 +516,16 @@ $('#prodForm').addEventListener('submit', async e => {
   const ok = await write(() => db.collection('products').doc(code).set(body), editing ? 'Saved' : `Added. Write ${code} on the label`);
   $('#prodGo').disabled = false;
   if (ok) { mem.set('bag', $('#pBag').value); mem.set('clasp', $('#pClasp').value); mem.set('mul', $('#pMul').value); mem.set('extra', $('#pExtra').value); $('#prodSheet').hidden = true; editing = null; }
+});
+$('#prodCopy').addEventListener('click', () => {
+  const p = products.get(editing); if (!p) return;
+  openProd(null);
+  $('#pName').value = p.name; $('#pCost').value = num(p.costPiece ?? p.cost);
+  $('#pBag').value = num(p.costBag) || ''; $('#pClasp').value = num(p.costClasp) || '';
+  $('#pMul').value = num(p.markup) || 2; $('#pExtra').value = num(p.extra) || '';
+  $('#pType').value = TYPES[p.type] ? p.type : 'necklace';
+  priceTouched = false; setCat(p.category === 'handmade' ? 'handmade' : 'stainless'); calc();
+  toast('Copied. Change what is different, then save.');
 });
 let armed = false;
 $('#prodDel').addEventListener('click', async () => {
@@ -502,11 +538,15 @@ $('#prodDel').addEventListener('click', async () => {
 /* ---------- events ---------- */
 document.addEventListener('click', async e => {
   const t = e.target;
-  if (t.closest('[data-close]') || t.classList.contains('scrim')) { $('#sellSheet').hidden = true; $('#prodSheet').hidden = true; return; }
+  if (t.closest('[data-close]') || t.classList.contains('scrim')) { $('#sellSheet').hidden = true; $('#prodSheet').hidden = true; $('#importSheet').hidden = true; return; }
   const nav = t.closest('#nav [data-v]'); if (nav) { view = nav.dataset.v; render(); window.scrollTo(0,0); return; }
   const chip = t.closest('#stockChips [data-f]'); if (chip) { stockFilter = chip.dataset.f; render(); return; }
   const s = t.closest('[data-sell]'); if (s) return openSell(s.dataset.sell);
   const ed = t.closest('[data-edit]'); if (ed) return openProd(ed.dataset.edit);
+  const pl = t.closest('[data-plus]');
+  if (pl && db) { const p = products.get(pl.dataset.plus); if (!p) return;
+    const body = {...p, qty: num(p.qty) + 1}; pl.disabled = true;
+    await write(() => db.collection('products').doc(p.code).set(body), `${p.code}: one more piece added (${body.qty} in total)`); pl.disabled = false; return; }
   const u = t.closest('[data-undo]');
   if (u && db) {
     if (u.dataset.armed !== '1') { u.dataset.armed = '1'; u.textContent = 'Sure?'; return; }
@@ -516,10 +556,20 @@ document.addEventListener('click', async e => {
 $('#addBtn').addEventListener('click', () => openProd(null));
 $('#q').addEventListener('input', render);
 $('#salesFilter').addEventListener('change', e => { salesFilter = e.target.value; render(); });
-$('#bazaar').addEventListener('change', e => {
-  bazaar = e.target.value.trim(); render();
-  if (db) write(() => db.doc('meta/settings').set(settingsBody()), 'Bazaar name saved');
+$('#bazaarSel').addEventListener('change', e => {
+  const v = e.target.value;
+  if (v === '__new') { $('#newBazaarRow').hidden = false; $('#bazaar').focus(); return; }
+  $('#newBazaarRow').hidden = true; bazaar = v; e.target.blur(); render();
+  if (db) write(() => db.doc('meta/settings').set(settingsBody()), 'Now selling at ' + (v || 'no bazaar'));
 });
+$('#bazaarAdd').addEventListener('click', async () => {
+  const name = $('#bazaar').value.trim(); if (!name) { toast('Type the bazaar name first.'); return; }
+  bazaar = name; tables = {...tables, [name]: num(tables[name])};
+  $('#bazaar').value = ''; $('#newBazaarRow').hidden = true; render();
+  const body = tables;
+  if (db && await write(() => db.doc('meta/tables').set(body))) write(() => db.doc('meta/settings').set(settingsBody()), name + ' added');
+});
+$('#bazaar').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#bazaarAdd').click(); } });
 $('#webFee').addEventListener('change', e => {
   webFee = Math.min(90, Math.max(0, num(e.target.value))); render();
   if (db) write(() => db.doc('meta/settings').set(settingsBody()), 'Website fee saved');
@@ -554,6 +604,65 @@ $('#tableCost').addEventListener('change', e => {
   tables = {...tables, [curBazaar()]: num(e.target.value)}; render();
   const body = tables;
   if (db) write(() => db.doc('meta/tables').set(body), 'Table cost saved');
+});
+
+/* ---------- import an old sheet (code + final price) ---------- */
+const cellText = v => v == null ? '' : typeof v === 'object' ? (v.result != null ? String(v.result) : v.richText ? v.richText.map(t => t.text).join('') : v.text != null ? String(v.text) : '') : String(v);
+async function readRows(file){
+  const buf = await file.arrayBuffer();
+  if (/\.csv$/i.test(file.name)) return new TextDecoder().decode(buf).split(/\r?\n/).map(l => l.split(/[,;\t]/).map(c => c.trim().replace(/^"|"$/g, '')));
+  const wb = new ExcelJS.Workbook(); await wb.xlsx.load(buf);
+  const out = [], ws = wb.worksheets[0];
+  if (ws) ws.eachRow(r => out.push((r.values || []).slice(1).map(cellText)));
+  return out;
+}
+function pickRows(rows){
+  let start = 0, ci = 0, pi = 1, ni = -1, qi = -1;
+  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    const h = rows[i].map(c => String(c || '').toLowerCase());
+    const find = (words, skip) => h.findIndex((x, k) => !skip.includes(k) && words.some(w => x.includes(w)));
+    const c = find(['code', 'كود'], []), p = find(['price', 'final', 'سعر'], [c]);
+    if (c >= 0 && p >= 0) { start = i + 1; ci = c; pi = p; ni = find(['name', 'product', 'item', 'اسم'], [c, p]); qi = find(['qty', 'quantity', 'pieces', 'عدد', 'كمية'], [c, p, ni]); break; }
+  }
+  const seen = new Set(), out = [];
+  for (const r of rows.slice(start)) {
+    const code = String(r[ci] || '').trim().replace(/[^A-Za-z0-9_\-.]+/g, '-').replace(/^[-.]+|[-.]+$/g, '');
+    const price = num(String(r[pi] ?? '').replace(/[^\d.]/g, ''));
+    if (!code || !price || seen.has(code)) continue;
+    seen.add(code);
+    out.push({code, price, name: ni >= 0 ? String(r[ni] || '').trim() : '', qty: qi >= 0 ? Math.max(1, Math.floor(num(r[qi]))) : 1});
+  }
+  return out;
+}
+let importRows = [];
+$('#importBtn').addEventListener('click', () => $('#importFile').click());
+$('#importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (/\.xls$/i.test(f.name)) { toast('Old .xls files do not open here. Open it in Excel and save it as .xlsx.'); return; }
+  if (!window.ExcelJS && !/\.csv$/i.test(f.name)) { toast('The Excel reader did not load. Reload the page and try again.'); return; }
+  let all;
+  try { all = pickRows(await readRows(f)); } catch (err) { toast('Could not read this file. Save it as .xlsx and try again.'); return; }
+  if (!all.length) { toast('No rows with a code and a price were found in the first sheet.'); return; }
+  importRows = all.filter(r => !products.has(r.code));
+  const skipped = all.length - importRows.length;
+  $('#importTitle').textContent = `${importRows.length} products to import`;
+  $('#importInfo').textContent = (skipped ? `${skipped} codes are already in your stock and will be left as they are. ` : '') + 'Each one comes in with its code and price, 1 piece, and cost 0. Open Edit on a product afterwards to add its name, cost and quantity.';
+  $('#importList').innerHTML = importRows.slice(0, 6).map(r => `<div class="item"><div class="info"><div class="nm">${esc(r.name || r.code)}</div><div class="meta">${tagHtml(r.code)}<span>${r.qty} piece${r.qty > 1 ? 's' : ''}</span></div></div><div class="price">${money(r.price)}</div></div>`).join('')
+    + (importRows.length > 6 ? `<div class="empty">and ${importRows.length - 6} more</div>` : '');
+  $('#importGo').disabled = !importRows.length; $('#importGo').textContent = 'Import them';
+  $('#importSheet').hidden = false;
+});
+$('#importGo').addEventListener('click', async () => {
+  if (!db || !importRows.length) return;
+  const btn = $('#importGo'), rows = importRows; btn.disabled = true;
+  let n = 0;
+  for (const r of rows) {
+    const body = {code:r.code, name:r.name || r.code, category:'stainless', type:'other', costPiece:0, costBag:0, costClasp:0, cost:0, markup:2, extra:0, tableAdd:0, price:r.price, qty:r.qty, createdAt:Date.now(), imported:true};
+    if (!await write(() => db.collection('products').doc(r.code).set(body))) break;
+    n++; btn.textContent = `${n} of ${rows.length}…`;
+  }
+  btn.disabled = false; importRows = []; $('#importSheet').hidden = true;
+  toast(n === rows.length ? `${n} products imported` : `${n} of ${rows.length} imported, then the connection failed. Import the file again to finish.`);
 });
 
 /* ---------- export ---------- */
@@ -671,7 +780,7 @@ $('#exportBtn').addEventListener('click', async () => {
       webFee = num(st.webFee);
       if (st.pA) pA = String(st.pA); if (st.pB) pB = String(st.pB);
       if (st.shareA != null) shareA = num(st.shareA); if (st.keep != null) keep = num(st.keep);
-      bazaar = String(st.bazaar || ''); if (document.activeElement !== $('#bazaar')) $('#bazaar').value = bazaar; render();
+      bazaar = String(st.bazaar || ''); render();
     }, () => {});
     db.doc('meta/tables').onSnapshot(snap => { tables = snap.exists ? {...(snap.data() || {})} : {}; render(); }, () => {});
   });
