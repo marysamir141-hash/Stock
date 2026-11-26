@@ -202,6 +202,12 @@ input[type=search]{padding-left:42px;background:var(--surface) url("data:image/s
         <input id="bazaar" type="text" placeholder="e.g. Zamalek Bazaar" autocomplete="off"></label>
       <button class="btn primary" id="bazaarAdd" type="button" style="align-self:flex-end">Add</button>
     </div>
+    <button class="btn small" id="renameBtn" type="button" style="align-self:flex-start" hidden>Rename this bazaar</button>
+    <div class="row" id="renameRow" hidden>
+      <label class="field" style="flex:2"><span>New name for this bazaar</span>
+        <input id="renameIn" type="text" autocomplete="off"></label>
+      <button class="btn primary" id="renameGo" type="button" style="align-self:flex-end">Save</button>
+    </div>
     <div class="stats">
       <div class="stat"><b id="sPieces">0</b><span>Pieces sold</span></div>
       <div class="stat"><b id="sRev">0</b><span>EGP taken</span></div>
@@ -276,7 +282,7 @@ input[type=search]{padding-left:42px;background:var(--surface) url("data:image/s
     <div class="list" id="salesList"></div>
   </div>
   </section>
-  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 11</div>
+  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 12</div>
 </main>
 
 <nav class="nav" id="nav" hidden><img class="nav-logo" src="logo.png" width="640" height="177" alt=""><div class="nav-in">
@@ -442,6 +448,7 @@ function renderSell(all){
     bs.innerHTML = (bazaar ? '' : '<option value="">Choose a bazaar</option>') + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('') + '<option value="__new">+ New bazaar…</option>';
     bs.value = $('#newBazaarRow').hidden ? bazaar : '__new';
   }
+  $('#renameBtn').hidden = !bazaar || !$('#renameRow').hidden || !$('#newBazaarRow').hidden;
   const tc = num(tables[curBazaar()]);
   if (document.activeElement !== $('#tableCost')) $('#tableCost').value = tc || '';
   const tn = $('#tableNote'), tb = $('#tableBtn'), net = grossOf(here) - tc;
@@ -662,6 +669,23 @@ $('#bazaarAdd').addEventListener('click', async () => {
   $('#bazaar').value = ''; $('#newBazaarRow').hidden = true; render();
   const body = tables;
   if (db && await write(() => db.doc('meta/tables').set(body))) write(() => db.doc('meta/settings').set(settingsBody()), name + ' added');
+});
+$('#renameBtn').addEventListener('click', () => { $('#renameRow').hidden = false; $('#renameIn').value = bazaar; render(); $('#renameIn').focus(); });
+$('#renameIn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#renameGo').click(); } });
+$('#renameGo').addEventListener('click', async () => {
+  const old = bazaar, nw = $('#renameIn').value.trim();
+  if (!nw || nw === old) { $('#renameRow').hidden = true; render(); return; }
+  if (allBazaars().includes(nw)) { toast('There is already a bazaar with this name.'); return; }
+  if (!db) return;
+  const btn = $('#renameGo'); btn.disabled = true;
+  const t = {...tables}; t[nw] = num(t[old]); delete t[old];
+  const mine = sales.filter(s => s.bazaar === old);
+  tables = t; bazaar = nw; if (salesFilter === old) salesFilter = nw;
+  $('#renameRow').hidden = true; render();
+  let ok = await write(() => db.doc('meta/tables').set(t)) && await write(() => db.doc('meta/settings').set(settingsBody())), n = 0;
+  if (ok) for (const s of mine) { const body = {...s, bazaar: nw}; delete body.id; if (!await write(() => db.collection('sales').doc(s.id).set(body))) { ok = false; break; } n++; }
+  btn.disabled = false;
+  toast(ok ? `Renamed to ${nw}` + (n ? `. ${n} sales moved with it.` : '.') : `Renamed, but only ${n} of ${mine.length} sales moved before the connection failed. Rename it again to finish.`);
 });
 $('#bazaar').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#bazaarAdd').click(); } });
 $('#webFee').addEventListener('change', e => {
