@@ -8,138 +8,152 @@
 </head><body>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Lexend+Deca:wght@300;400;500;600&display=swap">
 <style>
-/* Layout: one-hand phone tool. Sticky brand bar, three views on a bottom tab bar,
-   every product row led by its label code drawn as a punched price tag. */
+/* Layout: one-hand phone app. Frosted top bar, a gradient summary card, products as
+   separate soft cards, and a floating icon tab bar. One look: blush and teal. */
 :root{
-  --bg:#fbecea; --surface:#ffffff; --sunk:#f4dedb; --ink:#2c4a4a; --muted:#66757a; --line:#f0d8d5;
-  --accent:#457373; --accent-ink:#ffffff; --accent-soft:#dcebe9; --star:#fff8f7; --logo-filter:none;
-  --good:#1f7a55; --good-soft:#dcf1e7; --bad:#b3261e; --bad-soft:#f9e1df;
+  --bg:#fbf6f5; --surface:#ffffff; --sunk:#f4eceb; --ink:#1f3333; --muted:#6c7a79; --line:#efe4e2;
+  --accent:#457373; --accent-2:#2f5656; --accent-ink:#ffffff; --accent-soft:#e6f0ee; --blush:#f9e3df;
+  --good:#1f7a55; --good-soft:#dff3e9; --bad:#b3261e; --bad-soft:#fbe4e2;
   --display:"Lexend Deca",system-ui,sans-serif; --body:"Lexend Deca",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --starshape:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 0C52 38 62 48 100 50 62 52 52 62 50 100 48 62 38 52 0 50 38 48 48 38 50 0Z'/%3E%3C/svg%3E");
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
-  --r:12px;
+  --ring:0 0 0 1px var(--line), 0 1px 2px rgba(31,51,51,.05);
+  --lift:0 1px 2px rgba(31,51,51,.05), 0 8px 22px rgba(31,51,51,.06);
+  --logo-filter:none;
 }
-/* One look on purpose: blush and teal in both light and dark app themes. */
-
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;font-weight:400;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 button,input,select{font:inherit;color:inherit}
-button{cursor:pointer}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.deco{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(110% 46% at 100% 0%,var(--blush) 0%,transparent 62%),radial-gradient(70% 30% at 0% 100%,var(--accent-soft) 0%,transparent 70%)}
+.deco i{display:none}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:rgba(251,246,245,.8);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px)}
 .bar-in,.wrap,.nav-in{max-width:640px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.bar-in{display:flex;align-items:center;gap:12px;padding-block:10px}
-.mark{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:lowercase}
-.mark small{font-family:var(--body);font-weight:500;font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-left:8px}
+.bar-in{display:flex;align-items:center;gap:8px;padding-block:12px 10px}
+.logo{display:block;width:118px;height:auto;filter:var(--logo-filter)}
 .spacer{flex:1}
 
-.wrap{padding-block:16px calc(96px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
-.note{background:var(--sunk);border-radius:var(--r);padding:10px 12px;color:var(--muted);font-size:13px}
+.wrap{position:relative;z-index:1;padding-block:10px calc(108px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.view{display:flex;flex-direction:column;gap:14px}
+.note{background:var(--accent-soft);color:var(--accent-2);border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.5}
 
-.field{display:flex;flex-direction:column;gap:5px;min-width:0}
-.field>span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-input,select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 12px;min-height:44px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>span{font-size:12.5px;font-weight:500;color:var(--muted)}
+input,select{width:100%;min-height:48px;padding:12px 14px;background:var(--surface);border:1.5px solid transparent;border-radius:14px;box-shadow:var(--ring);transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(69,115,115,.14)}
+input::placeholder{color:#a9b3b2}
+input[type=search]{padding-left:42px;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c7a79' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") 14px center/18px no-repeat}
 .row{display:flex;gap:10px}
 .row>*{flex:1;min-width:0}
 
 .stats{display:flex;gap:10px}
-.stat{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
-.stat b{display:block;font-family:var(--display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.15}
-.stat span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stat{flex:1;min-width:0;background:var(--surface);border-radius:22px;padding:16px 18px;box-shadow:var(--lift)}
+.stat b{display:block;font-family:var(--display);font-size:30px;font-weight:500;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:4px;font-size:12.5px;color:var(--muted)}
+.stats .stat:first-child{background:linear-gradient(135deg,#558a8a 0%,var(--accent-2) 100%);color:#fff;box-shadow:0 12px 26px rgba(47,86,86,.3)}
+.stats .stat:first-child span{color:rgba(255,255,255,.82)}
 
-.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;min-height:44px;font-weight:600;white-space:nowrap}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn.danger{color:var(--bad);border-color:var(--bad)}
-.btn.small{min-height:36px;padding:6px 12px;font-size:13px}
-.btn.block{width:100%}
-.btn:disabled{opacity:.5;cursor:default}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:10px 16px;border:0;border-radius:14px;background:var(--surface);box-shadow:var(--ring);font-weight:500;white-space:nowrap;transition:transform .12s,box-shadow .15s,background .15s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 16px rgba(69,115,115,.3)}
+.btn.danger{color:var(--bad);box-shadow:0 0 0 1px var(--bad-soft)}
+.btn.small{min-height:36px;padding:6px 13px;border-radius:11px;font-size:13px}
+.btn.block{width:100%;min-height:52px;border-radius:16px;font-size:15px}
+.btn:disabled{opacity:.45;transform:none;cursor:default}
 
-.chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:500;min-height:34px}
-.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding:2px 16px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:36px;padding:7px 14px;border:0;border-radius:999px;background:var(--surface);box-shadow:var(--ring);font-size:13px;font-weight:500;color:var(--muted);transition:background .15s,color .15s}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;box-shadow:none}
 
-.list{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.item{display:flex;align-items:center;gap:12px;padding:12px;border-top:1px solid var(--line)}
-.item:first-child{border-top:0}
-.item.out{background:var(--sunk)}
-.item.out .nm,.item.out .tag{opacity:.55}
-.info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
-.nm{font-weight:600;overflow-wrap:anywhere}
-.meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
-.price{font-family:var(--display);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
-.tag{position:relative;display:inline-block;font-family:var(--mono);font-weight:600;font-size:12.5px;letter-spacing:.04em;
-  padding:2px 8px 2px 18px;border:1px solid var(--ink);border-radius:3px 6px 6px 3px;color:var(--ink);white-space:nowrap}
-.tag::before{content:"";position:absolute;left:6px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;border:1px solid var(--ink)}
-.pill{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:2px 8px}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border-radius:18px;box-shadow:var(--lift)}
+.item.out{background:var(--sunk);box-shadow:none}
+.item.out .nm,.item.out .tag,.item.out .price{opacity:.5}
+.item[data-pick]{cursor:pointer}
+.info{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.nm{font-weight:500;overflow-wrap:anywhere}
+.meta{display:flex;gap:6px 8px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.price{font-family:var(--display);font-size:17px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:3px 8px;border-radius:8px;background:var(--accent-soft);color:var(--accent-2);font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.02em;white-space:nowrap}
+.pill{padding:3px 8px;border-radius:8px;font-size:11.5px;font-weight:500}
 .pill.in{background:var(--good-soft);color:var(--good)}
 .pill.out{background:var(--bad-soft);color:var(--bad)}
-.pill.hm{background:var(--accent-soft);color:var(--accent)}
-.empty{padding:28px 16px;text-align:center;color:var(--muted)}
-.empty b{display:block;color:var(--ink);font-family:var(--display);font-size:17px;margin-bottom:4px}
+.pill.hm{background:var(--blush);color:#8a4a40}
+.empty{padding:34px 20px;text-align:center;color:var(--muted);background:var(--surface);border-radius:18px;box-shadow:var(--lift)}
+.empty b{display:block;margin-bottom:4px;color:var(--ink);font-family:var(--display);font-size:18px;font-weight:500}
+.chk{flex:none;width:22px;height:22px;min-height:0;padding:0;box-shadow:none;accent-color:var(--accent);pointer-events:none}
 
-.nav{position:fixed;left:0;right:0;bottom:0;z-index:9;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
-.nav-in{display:flex}
-.nav button{flex:1;border:0;background:none;padding:12px 4px 10px;font-weight:600;font-size:13px;color:var(--muted);border-top:3px solid transparent;margin-top:-1px}
-.nav button[aria-current="page"]{color:var(--accent);border-top-color:var(--accent)}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:9;pointer-events:none;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.nav-in{pointer-events:auto;display:flex;gap:4px;max-width:340px;padding:6px;border-radius:24px;background:rgba(255,255,255,.86);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px);box-shadow:0 0 0 1px rgba(31,51,51,.05),0 14px 34px rgba(31,51,51,.18)}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;border:0;border-radius:18px;background:none;color:var(--muted);font-size:11.5px;font-weight:500;transition:background .15s,color .15s}
+.nav button svg{width:22px;height:22px}
+.nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent-2)}
 
-.scrim{position:fixed;inset:0;z-index:20;background:rgba(10,12,18,.55);display:flex;align-items:flex-end;justify-content:center}
-.sheet{width:100%;max-width:640px;max-height:92%;overflow:auto;background:var(--surface);border-radius:18px 18px 0 0;
-  padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
-  display:flex;flex-direction:column;gap:14px}
-.sheet h2{margin:0;font-family:var(--display);font-size:19px;text-wrap:balance}
-.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.seg button{flex:1;border:0;background:var(--surface);padding:10px;min-height:44px;font-weight:600;color:var(--muted)}
-.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:30;
-  background:var(--ink);color:var(--bg);border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:500;max-width:90%;text-align:center}
+.scrim{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center;background:rgba(20,32,32,.42);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.sheet{width:100%;max-width:640px;max-height:92%;overflow:auto;display:flex;flex-direction:column;gap:14px;background:var(--bg);border-radius:28px 28px 0 0;box-shadow:0 -10px 40px rgba(20,32,32,.2);
+  padding:10px max(18px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));animation:up .22s ease-out}
+.sheet::before{content:"";flex:none;align-self:center;width:40px;height:4px;border-radius:2px;background:#dccfcd;margin-bottom:4px}
+.sheet h2{margin:0;font-family:var(--display);font-size:21px;font-weight:500;letter-spacing:-.01em;text-wrap:balance}
+@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+.seg{display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--sunk)}
+.seg button{flex:1;min-height:40px;padding:8px;border:0;border-radius:11px;background:none;color:var(--muted);font-weight:500;transition:background .15s,color .15s}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(31,51,51,.12)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(104px + env(safe-area-inset-bottom,0px));z-index:30;max-width:90%;padding:11px 16px;border-radius:14px;background:var(--ink);color:#fff;font-size:13.5px;text-align:center;box-shadow:0 10px 28px rgba(20,32,32,.3)}
+#ver{text-align:center;font-size:11px;letter-spacing:.14em;color:#b3bcbb}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
-/* ---- em.em brand pass: sand ground, cream stars, teal ink, pill controls ---- */
-body::before{background:var(--bg)}
-.deco{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.deco i{position:absolute;background:var(--star);-webkit-mask:var(--starshape) center/contain no-repeat;mask:var(--starshape) center/contain no-repeat}
-.deco i:nth-child(1){width:560px;height:560px;left:-230px;top:-170px}
-.deco i:nth-child(2){width:280px;height:280px;right:-110px;top:52%}
-.wrap{position:relative;z-index:1}
-.bar{background:var(--bg);border-bottom:0}
-.bar-in{padding-block:14px 6px}
-.logo{display:block;width:136px;height:auto;filter:var(--logo-filter)}
-.view{display:flex;flex-direction:column;gap:14px}
-.field>span,.stat span{letter-spacing:.16em;font-weight:500}
-input,select{border-radius:14px}
-.stat{border:0;border-radius:20px;padding:14px 16px}
-.stat b{font-weight:400;font-size:28px}
-.stats .stat:first-child{background:var(--accent);color:var(--accent-ink)}
-.stats .stat:first-child span{color:var(--accent-ink);opacity:.82}
-.list{border-radius:20px}
-.list,.stat,.note{box-shadow:0 2px 14px rgba(69,115,115,.07)}
-.item{padding:14px}
-.nm{font-weight:500}
-.price{font-weight:500;color:var(--accent);font-size:17px}
-.tag,.tag::before{border-color:var(--accent)}
-.tag{color:var(--accent)}
-.btn{border-radius:999px;font-weight:500}
-.btn.primary{letter-spacing:.06em}
-.btn.block{text-transform:uppercase;letter-spacing:.16em;font-size:13px;min-height:50px}
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.seg{border-radius:999px}
-.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.sheet{border-radius:28px 28px 0 0}
-.sheet h2{font-weight:400;font-size:22px}
-.note{background:var(--surface)}
-.empty b{font-weight:400;font-size:20px}
-.empty::before{content:"";display:block;width:34px;height:34px;margin:0 auto 10px;background:var(--accent);-webkit-mask:var(--starshape) center/contain no-repeat;mask:var(--starshape) center/contain no-repeat}
-.nav{background:transparent;border-top:0;pointer-events:none;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-.nav-in{pointer-events:auto;max-width:360px;padding:6px;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;box-shadow:0 8px 26px rgba(44,74,74,.2)}
-.nav button{border-top:0;margin:0;border-radius:999px;padding:12px 4px;text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:500}
-.nav button[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
-.toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+/* ---- dashboard + wide screens: sidebar, KPI row, two-column views ---- */
+.nav-logo{display:none}
+#pageTitle{display:none;margin:0;font-family:var(--display);font-size:23px;font-weight:500;letter-spacing:-.01em}
+.side,.main{display:contents}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.kpis .stat:first-child{background:linear-gradient(135deg,#558a8a 0%,var(--accent-2) 100%);color:#fff;box-shadow:0 12px 26px rgba(47,86,86,.3)}
+.kpis .stat:first-child span{color:rgba(255,255,255,.82)}
+.cards{display:grid;gap:14px}
+.card{min-width:0;background:var(--surface);border-radius:22px;padding:18px 20px;box-shadow:var(--lift)}
+.card h3{margin:0 0 8px;font-family:var(--display);font-size:16px;font-weight:500}
+.rw{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 12px;padding:11px 0;border-top:1px solid var(--line)}
+.rw:first-child{border-top:0}
+.rw small{display:block;margin-top:3px;font-size:12.5px;color:var(--muted)}
+.rw .price{font-size:15px}
+.bar2{grid-column:1/-1;height:6px;border-radius:3px;background:var(--sunk)}
+.bar2 i{display:block;height:100%;border-radius:3px;background:var(--accent)}
+@media (min-width:900px){
+  .nav{top:0;right:auto;width:236px;padding:24px 16px;pointer-events:auto;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:1px 0 0 var(--line)}
+  .nav-logo{display:block;width:150px;height:auto;margin:4px 10px 28px}
+  .nav-in{flex-direction:column;max-width:none;margin:0;padding:0;gap:4px;background:none;box-shadow:none;border-radius:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .nav button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;border-radius:14px;font-size:14.5px}
+  .bar,.wrap{margin-left:236px}
+  .deco{left:236px}
+  .bar .logo{display:none}
+  #pageTitle{display:block}
+  .bar-in,.wrap{max-width:1240px;padding-left:32px;padding-right:32px}
+  .bar-in{padding-block:20px 14px}
+  .wrap{padding-block:6px 48px;gap:20px}
+  .view{gap:20px}
+  .view.cols{display:grid;grid-template-columns:360px minmax(0,1fr);gap:24px;align-items:start}
+  .side{display:flex;flex-direction:column;gap:14px;position:sticky;top:88px}
+  .main{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .main .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+  .main .list .empty{grid-column:1/-1}
+  .kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+  .chips{flex-wrap:wrap;margin-inline:0;padding-inline:2px}
+  .scrim{align-items:center}
+  .sheet{max-width:540px;max-height:88%;border-radius:26px;padding-top:24px;padding-bottom:24px}
+  .sheet::before{display:none}
+  .toast{bottom:28px}
+}
 </style>
 
 <div class="deco" aria-hidden="true"><i></i><i></i></div>
 <header class="bar"><div class="bar-in">
   <img class="logo" src="logo.png" width="640" height="177" alt="em.em, two souls, one design">
+  <h1 id="pageTitle">Dashboard</h1>
   <div class="spacer"></div>
   <button class="btn small" id="signOut" type="button" hidden>Sign out</button>
   <button class="btn small" id="exportBtn" type="button" hidden>Export Excel</button>
@@ -158,8 +172,24 @@ input,select{border-radius:14px}
   <div id="verify" class="list" hidden><div class="empty"><b>Check your email</b><span id="verifyMsg"></span><br><br>
     <button class="btn primary" id="verified" type="button">I clicked the link</button> <button class="btn" id="resend" type="button">Send again</button></div></div>
 
+  <!-- HOME -->
+  <section id="v-home" class="view" hidden>
+    <div class="kpis">
+      <div class="stat"><b id="hLeft">0</b><span>Pieces in stock</span></div>
+      <div class="stat"><b id="hValue">0</b><span>EGP stock value</span></div>
+      <div class="stat"><b id="hRev">0</b><span>EGP sold, all bazaars</span></div>
+      <div class="stat"><b id="hNet">0</b><span>EGP net profit</span></div>
+    </div>
+    <div class="cards">
+      <div class="card"><h3>Bazaars</h3><div id="hBaz"></div></div>
+      <div class="card"><h3>Best sellers</h3><div id="hTop"></div></div>
+      <div class="card"><h3>Down to the last piece</h3><div id="hLow"></div></div>
+    </div>
+  </section>
+
   <!-- SELL -->
-  <section id="v-sell" class="view" hidden>
+  <section id="v-sell" class="view cols" hidden>
+    <div class="side">
     <div class="row">
       <label class="field" style="flex:2"><span>Bazaar you are at now</span>
         <select id="bazaarSel"></select></label>
@@ -177,35 +207,51 @@ input,select{border-radius:14px}
     </div>
     <div class="note" id="tableNote" hidden></div>
     <button class="btn block" id="tableBtn" type="button" hidden></button>
-    <label class="field"><span>Find by code or name</span>
-      <input id="q" type="search" placeholder="SN004 or heart necklace" autocomplete="off"></label>
+    </div>
+    <div class="main">
+    <label class="field"><span>Find a piece</span>
+      <input id="q" type="search" placeholder="Code or name" autocomplete="off"></label>
     <div class="list" id="sellList"></div>
+  </div>
   </section>
 
   <!-- STOCK -->
-  <section id="v-stock" class="view" hidden>
-    <button class="btn primary block" id="addBtn" type="button">Add a product</button>
-    <button class="btn block" id="importBtn" type="button">Import my old Excel sheet</button>
-    <input id="importFile" type="file" accept=".xlsx,.csv" hidden>
+  <section id="v-stock" class="view cols" hidden>
+    <div class="side">
+    <div class="row">
+      <button class="btn primary block" id="addBtn" type="button" style="flex:1.6">Add a product</button>
+      <button class="btn block" id="importBtn" type="button">Import Excel</button>
+    </div>
+    <input id="importFile" type="file" accept=".xlsx,.xls,.csv" hidden>
     <label class="field"><span>Website takes (% of each sale)</span>
       <input id="webFee" type="number" inputmode="decimal" min="0" max="90" step="any" placeholder="0"></label>
     <div class="note" id="webNote" hidden></div>
+        <div class="stats">
+      <div class="stat"><b id="kLeft">0</b><span>Pieces left</span></div>
+      <div class="stat"><b id="kValue">0</b><span>EGP stock value</span></div>
+    </div>
+    </div>
+    <div class="main">
     <div class="chips" id="stockChips">
       <button class="chip" type="button" data-f="all" aria-pressed="true">All</button>
       <button class="chip" type="button" data-f="in" aria-pressed="false">In stock</button>
       <button class="chip" type="button" data-f="out" aria-pressed="false">Sold out</button>
       <button class="chip" type="button" data-f="stainless" aria-pressed="false">Stainless</button>
       <button class="chip" type="button" data-f="handmade" aria-pressed="false">Handmade</button>
+      <button class="chip" type="button" id="selToggle" aria-pressed="false">Select several</button>
     </div>
-    <div class="stats">
-      <div class="stat"><b id="kLeft">0</b><span>Pieces left</span></div>
-      <div class="stat"><b id="kValue">0</b><span>EGP stock value</span></div>
+    <div class="row" id="selBar" hidden>
+      <button class="btn small" id="selAll" type="button">Select all</button>
+      <button class="btn small danger" id="selDel" type="button">Delete 0</button>
+      <button class="btn small" id="selDone" type="button">Done</button>
     </div>
     <div class="list" id="stockList"></div>
+  </div>
   </section>
 
   <!-- SALES -->
-  <section id="v-sales" class="view" hidden>
+  <section id="v-sales" class="view cols" hidden>
+    <div class="side">
     <label class="field"><span>Show sales from</span><select id="salesFilter"></select></label>
     <div class="stats">
       <div class="stat"><b id="tPieces">0</b><span>Pieces</span></div>
@@ -223,15 +269,20 @@ input,select{border-radius:14px}
       <label class="field"><span>Brand %</span><input id="keep" type="number" inputmode="decimal" min="0" max="90" step="any"></label>
     </div>
     <div class="list" id="splitList"></div>
+    </div>
+    <div class="main">
     <div class="field"><span>Every sale</span></div>
     <div class="list" id="salesList"></div>
+  </div>
   </section>
+  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 10</div>
 </main>
 
-<nav class="nav" id="nav" hidden><div class="nav-in">
-  <button type="button" data-v="sell" aria-current="page">Sell</button>
-  <button type="button" data-v="stock">Stock</button>
-  <button type="button" data-v="sales">Sales</button>
+<nav class="nav" id="nav" hidden><img class="nav-logo" src="logo.png" width="640" height="177" alt=""><div class="nav-in">
+  <button type="button" data-v="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg>Home</button>
+  <button type="button" data-v="sell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l1 12H5L6 8z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/></svg>Sell</button>
+  <button type="button" data-v="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.6"/></svg>Stock</button>
+  <button type="button" data-v="sales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>Sales</button>
 </div></nav>
 
 <!-- Sell sheet -->
@@ -257,7 +308,7 @@ input,select{border-radius:14px}
   </div>
   <div class="row">
     <label class="field"><span>Type</span><select id="pType"></select></label>
-    <div class="field"><span>Label code</span><div style="min-height:44px;display:flex;align-items:center"><span class="tag" id="pCode">SN001</span></div></div>
+    <div class="field"><span>Label code</span><div style="min-height:48px;display:flex;align-items:center"><span class="tag" id="pCode">SN001</span></div></div>
   </div>
   <label class="field"><span>Name</span><input id="pName" type="text" placeholder="e.g. Gold heart necklace" required autocomplete="off"></label>
   <div class="row">
@@ -285,6 +336,7 @@ input,select{border-radius:14px}
 <!-- Import sheet -->
 <div class="scrim" id="importSheet" hidden><div class="sheet">
   <h2 id="importTitle">Import</h2>
+  <label class="field" id="importPickWrap" hidden><span>Which sheet</span><select id="importPick"></select></label>
   <div class="note" id="importInfo"></div>
   <div class="list" id="importList"></div>
   <div class="row">
@@ -300,6 +352,7 @@ input,select{border-radius:14px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 (function(){
 const $ = s => document.querySelector(s);
@@ -311,11 +364,12 @@ const NO_BAZAAR = 'No bazaar name';
 
 let db = null, downloads = null;
 let products = new Map(), sales = [], bazaar = '';
-let view = 'sell', stockFilter = 'all', salesFilter = '__all';
+let view = 'home', stockFilter = 'all', salesFilter = '__all';
 let selling = null, editing = null, formCat = 'stainless';
 let ready = {p:false, s:false};
 let tables = {}, priceTouched = false, tableShare = 0, tableApplied = false, tableArmed = false;
 const mem = { get(k){ try { return localStorage.getItem('emem.' + k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem('emem.' + k, v); } catch(e){} } };
+let selectMode = false, selArmed = false, shownCodes = []; const selected = new Set();
 let webFee = 0, pA = 'Partner 1', pB = 'Partner 2', shareA = 50, keep = 30;
 const settingsBody = () => ({bazaar, webFee, pA, pB, shareA, keep});
 const splitOf = net => { const kept = net > 0 ? Math.round(net * keep / 100) : 0, pool = Math.max(0, net - kept), a = Math.round(pool * shareA / 100); return {kept, a, b: pool - a}; };
@@ -347,14 +401,35 @@ function render(){
   if (!ready.p || !ready.s) return;
   $('#status').hidden = true; $('#nav').hidden = false;
   if (downloads) $('#exportBtn').hidden = false;
-  for (const v of ['sell','stock','sales']) $('#v-' + v).hidden = v !== view;
+  for (const v of ['home','sell','stock','sales']) $('#v-' + v).hidden = v !== view;
+  $('#pageTitle').textContent = {home:'Dashboard', sell:'Sell', stock:'Stock', sales:'Sales'}[view];
   document.querySelectorAll('#nav button').forEach(b => b.dataset.v === view ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current'));
   const sold = soldMap();
   const all = [...products.values()].map(p => ({...p, left: Math.max(0, num(p.qty) - (sold[p.code] || 0))}))
     .sort((a,b) => a.code < b.code ? -1 : 1);
+  if (view === 'home') renderHome(all);
   if (view === 'sell') renderSell(all);
   if (view === 'stock') renderStock(all);
   if (view === 'sales') renderSales();
+}
+function renderHome(all){
+  $('#hLeft').textContent = all.reduce((a,p) => a + p.left, 0);
+  $('#hValue').textContent = money(all.reduce((a,p) => a + p.left * num(p.price), 0));
+  $('#hRev').textContent = money(sales.reduce((a,s) => a + num(s.qty) * num(s.price), 0));
+  $('#hNet').textContent = money(grossOf(sales) - Object.values(tables).reduce((a,v) => a + num(v), 0));
+  const row = (a, sub, v, frac) => `<div class="rw"><div><div class="nm">${a}</div>${sub ? `<small>${sub}</small>` : ''}</div><div class="price">${v}</div>${frac == null ? '' : `<div class="bar2"><i style="width:${Math.max(2, Math.round(frac * 100))}%"></i></div>`}</div>`;
+  const none = t => `<div class="rw"><small>${t}</small></div>`;
+  const byB = {}, byC = {};
+  for (const s of sales) {
+    const b = byB[s.bazaar] || (byB[s.bazaar] = {q:0, r:0}); b.q += num(s.qty); b.r += num(s.qty) * num(s.price);
+    const c = byC[s.code] || (byC[s.code] = {q:0, name:s.name}); c.q += num(s.qty);
+  }
+  const bz = Object.entries(byB).sort((x,y) => y[1].r - x[1].r), maxR = Math.max(1, ...bz.map(x => x[1].r));
+  $('#hBaz').innerHTML = bz.length ? bz.map(([n,b]) => row(esc(n), `${b.q} pieces sold`, money(b.r) + ' EGP', b.r / maxR)).join('') : none('No sales yet. They show up here bazaar by bazaar.');
+  const top = Object.entries(byC).sort((x,y) => y[1].q - x[1].q).slice(0, 5), maxQ = Math.max(1, ...top.map(x => x[1].q));
+  $('#hTop').innerHTML = top.length ? top.map(([c,o]) => row(esc(o.name || c), tagHtml(c), o.q + ' sold', o.q / maxQ)).join('') : none('Nothing sold yet.');
+  const low = all.filter(p => num(p.qty) > 1 && p.left === 1).slice(0, 6), out = all.filter(p => p.left === 0).length;
+  $('#hLow').innerHTML = (low.length ? low.map(p => row(esc(p.name), tagHtml(p.code), '1 left')).join('') : none('No product that had several pieces is down to one.')) + (out ? none(out === 1 ? '1 product is sold out.' : `${out} products are sold out.`) : '');
 }
 function renderSell(all){
   const here = sales.filter(s => s.bazaar === curBazaar());
@@ -400,17 +475,22 @@ function renderStock(all){
   document.querySelectorAll('#stockChips .chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.f === stockFilter));
   const f = stockFilter;
   const rows = all.filter(p => f === 'all' || (f === 'in' && p.left > 0) || (f === 'out' && p.left === 0) || p.category === f);
+  shownCodes = rows.map(p => p.code);
+  for (const c of [...selected]) if (!products.has(c)) selected.delete(c);
+  $('#selToggle').setAttribute('aria-pressed', selectMode); $('#selBar').hidden = !selectMode;
+  $('#selDel').textContent = selArmed ? `Tap again to delete ${selected.size} for good` : `Delete ${selected.size}`; $('#selDel').disabled = !selected.size;
   const el = $('#stockList');
   if (!rows.length) { el.innerHTML = `<div class="empty"><b>${products.size ? 'Nothing in this filter' : 'Your stock list is empty'}</b>${products.size ? 'Try another filter.' : 'Tap “Add a product”, then write the code on its label.'}</div>`; return; }
-  el.innerHTML = rows.map(p => `<div class="item ${p.left ? '' : 'out'}">
+  el.innerHTML = rows.map(p => `<div class="item ${p.left ? '' : 'out'}" ${selectMode ? `data-pick="${esc(p.code)}"` : ''}>
+    ${selectMode ? `<input class="chk" type="checkbox" tabindex="-1" aria-label="Select ${esc(p.code)}" ${selected.has(p.code) ? 'checked' : ''}>` : ''}
     <div class="info"><div class="nm">${esc(p.name)}</div>
       <div class="meta">${tagHtml(p.code)}
         <span class="pill ${p.left ? 'in' : 'out'}">${p.left ? p.left + ' of ' + num(p.qty) + ' left' : 'Sold out'}</span>
         ${p.category === 'handmade' ? '<span class="pill hm">Handmade</span>' : ''}
         <span>cost ${money(p.cost)}</span>${webPrice(p) ? `<span>web ${money(webPrice(p))}</span>` : ''}</div></div>
     <div class="price">${money(p.price)}</div>
-    <button class="btn small" type="button" data-plus="${esc(p.code)}" aria-label="Add one more piece">+1</button>
-    <button class="btn small" type="button" data-edit="${esc(p.code)}">Edit</button></div>`).join('');
+    ${selectMode ? '' : `<button class="btn small" type="button" data-plus="${esc(p.code)}" aria-label="Add one more piece">+1</button>
+    <button class="btn small" type="button" data-edit="${esc(p.code)}">Edit</button>`}</div>`).join('');
 }
 function renderSales(){
   const names = [...new Set([...sales.map(s => s.bazaar), ...Object.keys(tables).filter(k => num(tables[k]) > 0)])];
@@ -539,6 +619,7 @@ $('#prodDel').addEventListener('click', async () => {
 document.addEventListener('click', async e => {
   const t = e.target;
   if (t.closest('[data-close]') || t.classList.contains('scrim')) { $('#sellSheet').hidden = true; $('#prodSheet').hidden = true; $('#importSheet').hidden = true; return; }
+  const pk = t.closest('[data-pick]'); if (pk) { const c = pk.dataset.pick; selected.has(c) ? selected.delete(c) : selected.add(c); selArmed = false; render(); return; }
   const nav = t.closest('#nav [data-v]'); if (nav) { view = nav.dataset.v; render(); window.scrollTo(0,0); return; }
   const chip = t.closest('#stockChips [data-f]'); if (chip) { stockFilter = chip.dataset.f; render(); return; }
   const s = t.closest('[data-sell]'); if (s) return openSell(s.dataset.sell);
@@ -554,6 +635,18 @@ document.addEventListener('click', async e => {
   }
 });
 $('#addBtn').addEventListener('click', () => openProd(null));
+$('#selToggle').addEventListener('click', () => { selectMode = !selectMode; selected.clear(); selArmed = false; render(); });
+$('#selDone').addEventListener('click', () => { selectMode = false; selected.clear(); selArmed = false; render(); });
+$('#selAll').addEventListener('click', () => { const all = shownCodes.every(c => selected.has(c)); for (const c of shownCodes) all ? selected.delete(c) : selected.add(c); selArmed = false; render(); });
+$('#selDel').addEventListener('click', async () => {
+  if (!db || !selected.size) return;
+  if (!selArmed) { selArmed = true; render(); return; }
+  selArmed = false; const codes = [...selected], btn = $('#selDel'); btn.disabled = true;
+  let n = 0;
+  for (const c of codes) { if (!await write(() => db.collection('products').doc(c).delete())) break; selected.delete(c); n++; }
+  selectMode = selected.size > 0; render();
+  toast(n === codes.length ? `${n} products deleted` : `${n} of ${codes.length} deleted, then the connection failed.`);
+});
 $('#q').addEventListener('input', render);
 $('#salesFilter').addEventListener('change', e => { salesFilter = e.target.value; render(); });
 $('#bazaarSel').addEventListener('change', e => {
@@ -608,48 +701,79 @@ $('#tableCost').addEventListener('change', e => {
 
 /* ---------- import an old sheet (code + final price) ---------- */
 const cellText = v => v == null ? '' : typeof v === 'object' ? (v.result != null ? String(v.result) : v.richText ? v.richText.map(t => t.text).join('') : v.text != null ? String(v.text) : '') : String(v);
-async function readRows(file){
+async function readSheets(file){
   const buf = await file.arrayBuffer();
-  if (/\.csv$/i.test(file.name)) return new TextDecoder().decode(buf).split(/\r?\n/).map(l => l.split(/[,;\t]/).map(c => c.trim().replace(/^"|"$/g, '')));
+  if (window.XLSX) {   // tolerant reader: .xlsx, .xls, .csv, files saved by Google Sheets or Numbers
+    const wb = XLSX.read(new Uint8Array(buf), {type:'array'});
+    return wb.SheetNames.map(name => ({name, rows: XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, raw:true, defval:'', blankrows:false}).map(r => r.map(cellText))}));
+  }
+  if (/\.csv$/i.test(file.name)) return [{name:'CSV', rows:new TextDecoder().decode(buf).split(/\r?\n/).map(l => l.split(/[,;\t]/).map(c => c.trim().replace(/^"|"$/g, '')))}];
   const wb = new ExcelJS.Workbook(); await wb.xlsx.load(buf);
-  const out = [], ws = wb.worksheets[0];
-  if (ws) ws.eachRow(r => out.push((r.values || []).slice(1).map(cellText)));
-  return out;
+  return wb.worksheets.map(ws => { const rows = []; ws.eachRow(r => rows.push((r.values || []).slice(1).map(cellText))); return {name:ws.name, rows}; });
 }
 function pickRows(rows){
-  let start = 0, ci = 0, pi = 1, ni = -1, qi = -1;
-  for (let i = 0; i < Math.min(rows.length, 10); i++) {
-    const h = rows[i].map(c => String(c || '').toLowerCase());
-    const find = (words, skip) => h.findIndex((x, k) => !skip.includes(k) && words.some(w => x.includes(w)));
-    const c = find(['code', 'كود'], []), p = find(['price', 'final', 'سعر'], [c]);
-    if (c >= 0 && p >= 0) { start = i + 1; ci = c; pi = p; ni = find(['name', 'product', 'item', 'اسم'], [c, p]); qi = find(['qty', 'quantity', 'pieces', 'عدد', 'كمية'], [c, p, ni]); break; }
+  // A sheet can hold several Code/Price column pairs side by side. Every row is one physical piece,
+  // so rows that repeat a code add up to that product's quantity.
+  let start = 0, pairs = null;
+  for (let i = 0; i < Math.min(rows.length, 10) && !pairs; i++) {
+    const h = rows[i].map(c => String(c || '').toLowerCase().trim());
+    const codes = h.map((x, k) => /code|كود/.test(x) ? k : -1).filter(k => k >= 0), ps = [];
+    codes.forEach((c, n) => {
+      const end = n + 1 < codes.length ? codes[n + 1] : h.length; let p = -1, nm = -1, q = -1;
+      for (let k = c + 1; k < end; k++) {
+        if (p < 0 && /price|final|سعر/.test(h[k])) p = k;
+        else if (nm < 0 && /name|item|product|اسم/.test(h[k])) nm = k;
+        else if (q < 0 && /qty|quantity|pieces|عدد|كمية/.test(h[k])) q = k;
+      }
+      if (p >= 0) ps.push({c, p, nm, q});
+    });
+    if (ps.length) { pairs = ps; start = i + 1; }
   }
-  const seen = new Set(), out = [];
-  for (const r of rows.slice(start)) {
-    const code = String(r[ci] || '').trim().replace(/[^A-Za-z0-9_\-.]+/g, '-').replace(/^[-.]+|[-.]+$/g, '');
-    const price = num(String(r[pi] ?? '').replace(/[^\d.]/g, ''));
-    if (!code || !price || seen.has(code)) continue;
-    seen.add(code);
-    out.push({code, price, name: ni >= 0 ? String(r[ni] || '').trim() : '', qty: qi >= 0 ? Math.max(1, Math.floor(num(r[qi]))) : 1});
+  if (!pairs) {   // no header row: the first used column is the code, the next one the price
+    const first = rows.find(r => r.some(x => String(x || '').trim()));
+    const c = first ? Math.max(0, first.findIndex(x => String(x || '').trim())) : 0;
+    pairs = [{c, p: c + 1, nm: -1, q: -1}];
   }
-  return out;
+  const map = new Map(), clash = [];
+  for (const pr of pairs) for (const r of rows.slice(start)) {
+    const code = String(r[pr.c] || '').trim().toUpperCase().replace(/[^A-Z0-9_\-.]+/g, '-').replace(/^[-.]+|[-.]+$/g, '');
+    const price = num(String(r[pr.p] ?? '').replace(/[^\d.]/g, ''));
+    if (!code || !price) continue;
+    const qty = pr.q >= 0 ? Math.max(1, Math.floor(num(r[pr.q]))) : 1, name = pr.nm >= 0 ? String(r[pr.nm] || '').trim() : '';
+    const e = map.get(code);
+    if (e) { e.qty += qty; if (!e.name && name) e.name = name; if (e.price !== price && !clash.includes(code)) clash.push(code); }
+    else map.set(code, {code, price, name, qty});
+  }
+  const out = [...map.values()]; out.clash = clash; return out;
 }
-let importRows = [];
-$('#importBtn').addEventListener('click', () => $('#importFile').click());
-$('#importFile').addEventListener('change', async e => {
-  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-  if (/\.xls$/i.test(f.name)) { toast('Old .xls files do not open here. Open it in Excel and save it as .xlsx.'); return; }
-  if (!window.ExcelJS && !/\.csv$/i.test(f.name)) { toast('The Excel reader did not load. Reload the page and try again.'); return; }
-  let all;
-  try { all = pickRows(await readRows(f)); } catch (err) { toast('Could not read this file. Save it as .xlsx and try again.'); return; }
-  if (!all.length) { toast('No rows with a code and a price were found in the first sheet.'); return; }
-  importRows = all.filter(r => !products.has(r.code));
-  const skipped = all.length - importRows.length;
-  $('#importTitle').textContent = `${importRows.length} products to import`;
-  $('#importInfo').textContent = (skipped ? `${skipped} codes are already in your stock and will be left as they are. ` : '') + 'Each one comes in with its code and price, 1 piece, and cost 0. Open Edit on a product afterwards to add its name, cost and quantity.';
+const guessType = n => { n = String(n || '').toLowerCase(); return /earring/.test(n) ? 'earrings' : /ring/.test(n) ? 'ring' : /neck|chain|pendant/.test(n) ? 'necklace' : /brace|bangle/.test(n) ? 'bracelet' : /ankl/.test(n) ? 'anklet' : /\bset\b/.test(n) ? 'set' : 'other'; };
+let importRows = [], importSheets = [];
+function showImport(i){
+  const sh = importSheets[i]; if (!sh) return;
+  importRows = sh.found.filter(r => !products.has(r.code));
+  const skipped = sh.found.length - importRows.length;
+  const pieces = importRows.reduce((a, r) => a + r.qty, 0), clash = (sh.found.clash || []).filter(c => importRows.some(r => r.code === c));
+  $('#importTitle').textContent = `${importRows.length} products, ${pieces} pieces`;
+  $('#importInfo').textContent = !sh.found.length ? 'This sheet has no rows with a code and a price. Pick another sheet.'
+    : (skipped ? `${skipped} codes are already in your stock and will be left as they are. ` : '') + 'Rows that repeat a code were counted as pieces of the same product. Each product comes in with its code, price and quantity, and cost 0. Open Edit afterwards to add the cost.'
+      + (clash.length ? ` ${clash.join(', ')} had two different prices in the sheet; the first one was kept.` : '');
   $('#importList').innerHTML = importRows.slice(0, 6).map(r => `<div class="item"><div class="info"><div class="nm">${esc(r.name || r.code)}</div><div class="meta">${tagHtml(r.code)}<span>${r.qty} piece${r.qty > 1 ? 's' : ''}</span></div></div><div class="price">${money(r.price)}</div></div>`).join('')
     + (importRows.length > 6 ? `<div class="empty">and ${importRows.length - 6} more</div>` : '');
+  $('#importList').hidden = !importRows.length;
   $('#importGo').disabled = !importRows.length; $('#importGo').textContent = 'Import them';
+}
+$('#importBtn').addEventListener('click', () => $('#importFile').click());
+$('#importPick').addEventListener('change', e => showImport(Number(e.target.value)));
+$('#importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (!window.XLSX && !window.ExcelJS && !/\.csv$/i.test(f.name)) { toast('The Excel reader did not load. Reload the page and try again.'); return; }
+  try { importSheets = (await readSheets(f)).map(sh => ({...sh, found: pickRows(sh.rows)})); } catch (err) { toast('Could not read this file: ' + String((err && err.message) || err).slice(0, 80)); return; }
+  if (!importSheets.some(sh => sh.found.length)) { toast('No rows with a code and a price were found in this file.'); return; }
+  let best = 0; importSheets.forEach((sh, i) => { if (sh.found.length > importSheets[best].found.length) best = i; });
+  $('#importPickWrap').hidden = importSheets.length < 2;
+  $('#importPick').innerHTML = importSheets.map((sh, i) => `<option value="${i}">${esc(sh.name)} (${sh.found.length} products)</option>`).join('');
+  $('#importPick').value = String(best);
+  showImport(best);
   $('#importSheet').hidden = false;
 });
 $('#importGo').addEventListener('click', async () => {
@@ -657,7 +781,7 @@ $('#importGo').addEventListener('click', async () => {
   const btn = $('#importGo'), rows = importRows; btn.disabled = true;
   let n = 0;
   for (const r of rows) {
-    const body = {code:r.code, name:r.name || r.code, category:'stainless', type:'other', costPiece:0, costBag:0, costClasp:0, cost:0, markup:2, extra:0, tableAdd:0, price:r.price, qty:r.qty, createdAt:Date.now(), imported:true};
+    const body = {code:r.code, name:r.name || r.code, category:'stainless', type:guessType(r.name), costPiece:0, costBag:0, costClasp:0, cost:0, markup:2, extra:0, tableAdd:0, price:r.price, qty:r.qty, createdAt:Date.now(), imported:true};
     if (!await write(() => db.collection('products').doc(r.code).set(body))) break;
     n++; btn.textContent = `${n} of ${rows.length}…`;
   }
@@ -765,7 +889,7 @@ $('#exportBtn').addEventListener('click', async () => {
     db = firebase.firestore();
     try { db.settings({ignoreUndefinedProperties:true}); } catch(e) {}
     db.enablePersistence({synchronizeTabs:true}).catch(() => {});
-    const fail = () => { $('#status').hidden = false; $('#nav').hidden = true; for (const v of ['sell','stock','sales']) $('#v-' + v).hidden = true;
+    const fail = () => { $('#status').hidden = false; $('#nav').hidden = true; for (const v of ['home','sell','stock','sales']) $('#v-' + v).hidden = true;
       $('#status').textContent = 'This Google account (' + (user.email || '') + ') is not on the allowed list. Sign out and use a partner account.'; };
     db.collection('products').onSnapshot(snap => {
       products = new Map(snap.docs.map(d => { const x = d.data() || {}; return [d.id, {...x, code:d.id}]; }));
