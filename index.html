@@ -188,7 +188,7 @@ input,select{border-radius:14px}
   <section id="v-stock" class="view" hidden>
     <button class="btn primary block" id="addBtn" type="button">Add a product</button>
     <button class="btn block" id="importBtn" type="button">Import my old Excel sheet</button>
-    <input id="importFile" type="file" accept=".xlsx,.csv" hidden>
+    <input id="importFile" type="file" accept=".xlsx,.xls,.csv" hidden>
     <label class="field"><span>Website takes (% of each sale)</span>
       <input id="webFee" type="number" inputmode="decimal" min="0" max="90" step="any" placeholder="0"></label>
     <div class="note" id="webNote" hidden></div>
@@ -234,7 +234,7 @@ input,select{border-radius:14px}
     <div class="field"><span>Every sale</span></div>
     <div class="list" id="salesList"></div>
   </section>
-  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 6</div>
+  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 7</div>
 </main>
 
 <nav class="nav" id="nav" hidden><div class="nav-in">
@@ -310,6 +310,7 @@ input,select{border-radius:14px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 (function(){
 const $ = s => document.querySelector(s);
@@ -639,6 +640,10 @@ $('#tableCost').addEventListener('change', e => {
 const cellText = v => v == null ? '' : typeof v === 'object' ? (v.result != null ? String(v.result) : v.richText ? v.richText.map(t => t.text).join('') : v.text != null ? String(v.text) : '') : String(v);
 async function readSheets(file){
   const buf = await file.arrayBuffer();
+  if (window.XLSX) {   // tolerant reader: .xlsx, .xls, .csv, files saved by Google Sheets or Numbers
+    const wb = XLSX.read(new Uint8Array(buf), {type:'array'});
+    return wb.SheetNames.map(name => ({name, rows: XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, raw:true, defval:'', blankrows:false}).map(r => r.map(cellText))}));
+  }
   if (/\.csv$/i.test(file.name)) return [{name:'CSV', rows:new TextDecoder().decode(buf).split(/\r?\n/).map(l => l.split(/[,;\t]/).map(c => c.trim().replace(/^"|"$/g, '')))}];
   const wb = new ExcelJS.Workbook(); await wb.xlsx.load(buf);
   return wb.worksheets.map(ws => { const rows = []; ws.eachRow(r => rows.push((r.values || []).slice(1).map(cellText))); return {name:ws.name, rows}; });
@@ -678,9 +683,8 @@ $('#importBtn').addEventListener('click', () => $('#importFile').click());
 $('#importPick').addEventListener('change', e => showImport(Number(e.target.value)));
 $('#importFile').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-  if (/\.xls$/i.test(f.name)) { toast('Old .xls files do not open here. Open it in Excel and save it as .xlsx.'); return; }
-  if (!window.ExcelJS && !/\.csv$/i.test(f.name)) { toast('The Excel reader did not load. Reload the page and try again.'); return; }
-  try { importSheets = (await readSheets(f)).map(sh => ({...sh, found: pickRows(sh.rows)})); } catch (err) { toast('Could not read this file. Save it as .xlsx and try again.'); return; }
+  if (!window.XLSX && !window.ExcelJS && !/\.csv$/i.test(f.name)) { toast('The Excel reader did not load. Reload the page and try again.'); return; }
+  try { importSheets = (await readSheets(f)).map(sh => ({...sh, found: pickRows(sh.rows)})); } catch (err) { toast('Could not read this file: ' + String((err && err.message) || err).slice(0, 80)); return; }
   if (!importSheets.some(sh => sh.found.length)) { toast('No rows with a code and a price were found in this file.'); return; }
   let best = 0; importSheets.forEach((sh, i) => { if (sh.found.length > importSheets[best].found.length) best = i; });
   $('#importPickWrap').hidden = importSheets.length < 2;
