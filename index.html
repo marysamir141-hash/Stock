@@ -92,6 +92,16 @@ input[type=file]{padding:10px;font-size:13px}
 textarea{width:100%;padding:12px 14px;background:var(--surface);border:1.5px solid transparent;border-radius:14px;box-shadow:var(--ring);font:inherit;color:inherit;resize:vertical}
 textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(69,115,115,.14)}
 #selBar{flex-wrap:wrap}
+.grp{background:var(--surface);border-radius:18px;box-shadow:var(--lift)}
+.grp summary{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;cursor:pointer;list-style:none;font-weight:500}
+.grp summary::-webkit-details-marker{display:none}
+.grp summary::after{content:"+";flex:none;font-size:20px;font-weight:300;line-height:1;color:var(--accent)}
+.grp[open] summary::after{content:"\2212"}
+.grp-in{display:flex;flex-direction:column;gap:14px;padding:0 18px 18px}
+.cmsCard{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:14px;background:var(--bg)}
+.cmsCard .row{align-items:center}
+.thumb{flex:none;width:84px;height:60px;object-fit:cover;border-radius:10px;background:var(--sunk)}
+.sechead{margin-top:10px;font-family:var(--display);font-size:17px;font-weight:500}
 #selBar>*{flex:none}
 .empty{padding:34px 20px;text-align:center;color:var(--muted);background:var(--surface);border-radius:18px;box-shadow:var(--lift)}
 .empty b{display:block;margin-bottom:4px;color:var(--ink);font-family:var(--display);font-size:18px;font-weight:500}
@@ -328,9 +338,25 @@ textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba
     <label class="field"><span>Tapping it opens</span><select id="bnLink">
       <option value="shop.html">Shop all</option><option value="necklaces.html">Necklaces</option><option value="bangles.html">Bangles</option><option value="earrings.html">Earrings</option><option value="bracelets.html">Bracelets</option><option value="stones.html">Stones</option><option value="story.html">Our story</option></select></label>
     <button class="btn block" id="bnAdd" type="button">Add this banner</button>
+    <div class="sechead">Edit the website</div>
+    <div class="note">Open a part, change what you want, then press “Publish website changes” at the bottom. An empty box keeps the original text. Put *stars* around a word to write it in the handwritten style.</div>
+    <details class="grp"><summary>Carousel and motion</summary><div class="grp-in">
+      <div class="row">
+        <label class="field"><span>Banner change effect</span><select id="fxEffect"><option value="wipe">Wipe</option><option value="slide">Slide</option><option value="fade">Fade</option></select></label>
+        <label class="field"><span>Seconds per banner</span><input id="fxSeconds" type="number" inputmode="decimal" min="3" max="20" step="0.5"></label>
+      </div>
+      <label class="tog"><input id="fxZoom" type="checkbox"><span>Slow zoom on banner photos</span></label>
+      <label class="tog"><input id="fxReveal" type="checkbox"><span>Parts fade in while scrolling</span></label>
+      <label class="tog"><input id="fxMarquee" type="checkbox"><span>Moving line under the banner</span></label>
+      <label class="field"><span>Words in the moving line (comma between them)</span><input id="fxWords" type="text" placeholder="two souls, one design, stainless steel, handmade" autocomplete="off"></label>
+    </div></details>
+    <div id="cmsGroups" class="view" style="gap:14px"></div>
+    <details class="grp"><summary>Story page · chapters</summary><div class="grp-in" id="cmsStory"></div></details>
+    <details class="grp"><summary>Extra pages</summary><div class="grp-in" id="cmsPages"></div></details>
+    <button class="btn primary block" id="cmsSave" type="button">Publish website changes</button>
     <div class="note">The website only gets what you switch on: the pieces marked “Show this piece on the website” with their name, price and photo, and the lines on this page. Costs, sales, table costs, bazaar history and partner shares never leave this system.</div>
   </section>
-  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 16</div>
+  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 17</div>
 </main>
 
 <nav class="nav" id="nav" hidden><img class="nav-logo" src="logo.svg" width="3093" height="882" alt=""><div class="nav-in">
@@ -709,7 +735,7 @@ document.addEventListener('click', async e => {
   const bf = t.closest('[data-bnfirst]');
   if (bf && db) { const b = banners.find(x => x.id === bf.dataset.bnfirst); if (!b) return; const body = {...b, order: Math.min(...banners.map(x => num(x.order))) - 1}; delete body.id; bf.disabled = true; await write(() => db.collection('site').doc(b.id).set(body), 'This banner now shows first'); return; }
   const bd = t.closest('[data-bndel]');
-  if (bd && db) { if (bd.dataset.armed !== '1') { bd.dataset.armed = '1'; bd.textContent = 'Sure?'; return; } bd.disabled = true; await write(() => db.collection('site').doc(bd.dataset.bndel).delete(), 'Banner removed from the website'); return; }
+  if (bd && db) { if (bd.dataset.armed !== '1') { bd.dataset.armed = '1'; bd.textContent = 'Sure?'; return; } bd.disabled = true; const gone = banners.find(x => x.id === bd.dataset.bndel); if (await write(() => db.collection('site').doc(bd.dataset.bndel).delete(), 'Banner removed from the website') && gone && gone.pic) write(() => db.collection('catalogImg').doc(gone.pic).delete()); return; }
   const pl = t.closest('[data-plus]');
   if (pl && db) { const p = products.get(pl.dataset.plus); if (!p) return;
     const body = {...p, qty: num(p.qty) + 1}; pl.disabled = true;
@@ -835,10 +861,12 @@ function reconcile(){
 function renderWeb(){
   const n = [...products.values()].filter(p => p.web).length, noPic = [...products.values()].filter(p => p.web && !p.hasImg).length;
   $('#webCount').textContent = `${n} of ${products.size} pieces are on the website.` + (noPic ? ` ${noPic} of them have no photo yet.` : '') + ' Switch a piece on from Stock → Edit, or tick several with “Select several”.';
-  $('#bnList').innerHTML = banners.length ? banners.map((b, i) => `<div class="item"><img src="${esc(b.img)}" alt="" style="flex:none;width:92px;height:52px;object-fit:cover;border-radius:10px">
+  $('#bnList').innerHTML = banners.length ? banners.map((b, i) => `<div class="item"><img class="thumb" ${b.img ? `src="${esc(b.img)}"` : `data-cthumb="${esc(b.pic || '')}"`} alt="">
     <div class="info"><div class="nm">${esc(b.ready ? 'Designed banner' : (b.kicker || 'Photo banner'))}</div><div class="meta"><span>${esc(b.ready ? 'Its text is in the picture' : (b.text || ''))}</span></div></div>
     ${i ? `<button class="btn small" type="button" data-bnfirst="${esc(b.id)}">First</button>` : '<span class="pill web">First</span>'}<button class="btn small danger" type="button" data-bndel="${esc(b.id)}">Delete</button></div>`).join('')
     : '<div class="empty"><b>No banners of your own yet</b>The website shows its built-in banners until you add one here.</div>';
+  fillThumbs($('#bnList'));
+  if (!cmsBuilt && draftReady()) buildCms();
   if (siteDirty || $('#v-web').contains(document.activeElement)) return;
   $('#wsPhone').value = siteSet.whatsapp || ''; $('#wsOfferShow').checked = !!siteSet.offerShow; $('#wsOffer').value = siteSet.offerText || ''; $('#wsDisc').value = num(siteSet.discount) || '';
   const b = siteSet.bazaar || {}; $('#wsBzShow').checked = !!b.show; $('#wsBzName').value = b.name || bazaar || ''; $('#wsBzDate').value = b.date || ''; $('#wsBzPlace').value = b.place || '';
@@ -851,6 +879,105 @@ $('#wsSave').addEventListener('click', async () => {
   if (await write(() => db.doc('site/settings').set(body), 'Website settings saved')) { siteSet = body; siteDirty = false; }
 });
 $('#pWeb').addEventListener('change', e => { $('#webFields').hidden = !e.target.checked; });
+/* ---------- website editor: one public document, site/content; its pictures are catalogImg/cms-<key> ---------- */
+const CMS = {"groups": [{"title": "Home · Banner heading", "fields": [{"k": "hero.l1", "l": "First line", "d": "Two souls,"}, {"k": "hero.l2", "l": "Second line (handwritten style)", "d": "one design."}]}, {"title": "Home · Shop by category", "hide": "cats", "fields": [{"k": "cats.kicker", "l": "Small line", "d": "Shop by category"}, {"k": "cats.title", "l": "Title", "d": "Find your *piece*"}, {"k": "cat.necklaces", "l": "Necklaces picture", "img": true}, {"k": "cat.bracelets", "l": "Bracelets picture", "img": true}, {"k": "cat.stones", "l": "Stones picture", "img": true}, {"k": "cat.bangles", "l": "Bangles picture", "img": true}, {"k": "cat.earrings", "l": "Earrings picture", "img": true}]}, {"title": "Home · Newest pieces", "hide": "feat", "fields": [{"k": "feat.kicker", "l": "Small line", "d": "New"}, {"k": "feat.title", "l": "Title", "d": "Just *landed*"}]}, {"title": "Home · Story teaser", "hide": "teaser", "fields": [{"k": "teaser.kicker", "l": "Small line", "d": "Our story"}, {"k": "teaser.title", "l": "Title", "d": "Two souls, *one design*"}, {"k": "teaser.text", "l": "Text", "area": true, "d": "em.em is two friends who became sisters, and one rule between them: a piece only gets made when both of us would wear it. It began behind a bazaar table, with labels written by hand."}, {"k": "teaser.button", "l": "Button", "d": "Read our story"}, {"k": "teaser.img", "l": "Picture", "img": true}]}, {"title": "Home · How to order", "hide": "order", "fields": [{"k": "order.kicker", "l": "Small line", "d": "How to order"}, {"k": "order.title", "l": "Title", "d": "Three taps, then we talk"}, {"k": "step1.title", "l": "Step 1 title", "d": "Pick your pieces"}, {"k": "step1.text", "l": "Step 1 text", "area": true, "d": "Tap “Add to order” on anything you love, from any page."}, {"k": "step2.title", "l": "Step 2 title", "d": "Send it on WhatsApp"}, {"k": "step2.text", "l": "Step 2 text", "area": true, "d": "Open “My order” and send the list. It arrives in our chat with the codes."}, {"k": "step3.title", "l": "Step 3 title", "d": "We confirm with you"}, {"k": "step3.text", "l": "Step 3 text", "area": true, "d": "We agree on delivery and payment with you there. Nothing is charged on the site."}]}, {"title": "Home · Bazaar card", "hide": "bazaar", "fields": [{"k": "bazaar.kicker", "l": "Small line", "d": "Next bazaar"}, {"k": "bazaar.title", "l": "Title when no bazaar is set", "d": "Come say hi at the table"}, {"k": "bazaar.text", "l": "Text when no bazaar is set", "area": true, "d": "We announce every bazaar before it happens. Follow us to know where the table will be next."}]}, {"title": "Story page · top and ending", "fields": [{"k": "story.kicker", "l": "Small line", "d": "Our story"}, {"k": "story.intro", "l": "Opening sentence", "area": true, "d": "It started with a friendship, long before it was a brand."}, {"k": "story.sign", "l": "Ending signature", "d": "with love, em.em"}]}, {"title": "Footer", "fields": [{"k": "footer.tag", "l": "Line under the logo", "area": true, "d": "Stainless steel and handmade jewelry, made by two friends who became sisters."}, {"k": "footer.thanks", "l": "Handwritten line", "d": "thank you for your order"}]}], "story": [{"title": "Before em.em", "text": "Two girls who told each other everything. Friends people mistake for sisters.", "img": ""}, {"title": "The little things", "text": "We kept sending each other pretty things at midnight. One night: why don’t we make our own?", "img": "img/aqua.jpg"}, {"title": "The name", "text": "Both our names start with the same letter. Em, a dot, and em.", "img": "img/horus-model.jpg"}, {"title": "The first table", "text": "A small bazaar table, labels written by hand, and the first stranger who smiled at the mirror.", "img": "img/table1.jpg"}, {"title": "Two souls, one design", "text": "A piece only leaves our hands when both of us love it.", "img": "img/coinpearl-hold.jpg"}, {"title": "And now, you", "text": "Wear it, and think of the one who is that friend to you.", "img": "img/table2.jpg"}]};
+let content = null, contentReady = false, draft = null, cmsBuilt = false, cmsDirty = false;
+const cmsPics = new Map();
+const cmsPic = id => { if (!cmsPics.has(id)) cmsPics.set(id, db.collection('catalogImg').doc(id).get().then(d => d.exists ? ((d.data() || {}).img || '') : '').catch(() => '')); return cmsPics.get(id); };
+const draftReady = () => !!db && contentReady;
+function fillThumbs(root){ root.querySelectorAll('img[data-cthumb]').forEach(img => { const id = img.dataset.cthumb; if (!id) return; cmsPic(id).then(u => { if (u) { img.src = u; img.hidden = false; img.removeAttribute('data-cthumb'); } }); }); }
+function shrink(file, max, done){
+  const url = URL.createObjectURL(file), im = new Image();
+  im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+    let q = .78, u = c.toDataURL('image/jpeg', q); while (u.length > 700000 && q > .4) { q -= .08; u = c.toDataURL('image/jpeg', q); } done(u); };
+  im.onerror = () => { URL.revokeObjectURL(url); toast('This picture could not be opened. Try a JPG or PNG.'); };
+  im.src = url;
+}
+function loadDraft(){
+  const c = content || {}, fx = {effect:'wipe', seconds:6.5, zoom:true, reveal:true, marquee:true, words:'', ...(c.fx || {})};
+  draft = {t:{...(c.t || {})}, i:{...(c.i || {})}, hide:{...(c.hide || {})}, fx,
+    story: Array.isArray(c.story) && c.story.length ? c.story.map(x => ({...x})) : CMS.story.map((x, k) => ({id:'s' + (k + 1), title:x.title, text:x.text, img:x.img || '', pic:0})),
+    pages: Array.isArray(c.pages) ? c.pages.map(x => ({...x})) : []};
+}
+const slot = (label, key, has, attr) => `<div class="row"><img class="thumb" alt="" ${has ? `data-cthumb="cms-${esc(key)}"` : ''} hidden><label class="field"><span>${esc(label)}</span><input type="file" accept="image/*" ${attr}></label>${has ? `<button class="btn small" type="button" data-ireset="${esc(key)}" style="flex:none;align-self:flex-end">Use the original</button>` : ''}</div>`;
+function buildStory(){
+  $('#cmsStory').innerHTML = draft.story.map((c, k) => `<div class="cmsCard"><div class="row"><label class="field" style="flex:3"><span>Chapter ${k + 1} title</span><input type="text" maxlength="60" data-st="${k}" data-f="title" value="${esc(c.title || '')}"></label>
+      <button class="btn small" type="button" data-stup="${k}" style="flex:none;align-self:flex-end" ${k ? '' : 'disabled'}>Up</button><button class="btn small danger" type="button" data-stdel="${k}" style="flex:none;align-self:flex-end">Remove</button></div>
+    <label class="field"><span>Text</span><textarea rows="2" maxlength="400" data-st="${k}" data-f="text">${esc(c.text || '')}</textarea></label>
+    <div class="row"><img class="thumb" alt="" ${c.pic ? `data-cthumb="cms-story-${esc(c.id)}"` : ''} hidden><label class="field"><span>Picture${c.pic ? '' : c.img ? ' (now: the built-in one)' : ' (none yet)'}</span><input type="file" accept="image/*" data-stimg="${k}"></label></div></div>`).join('')
+    + (draft.story.length < 12 ? '<button class="btn block" type="button" id="stAdd">Add a chapter</button>' : '');
+  fillThumbs($('#cmsStory'));
+}
+function buildPages(){
+  $('#cmsPages').innerHTML = (draft.pages.length ? '' : '<div class="note">No extra pages yet. A page gets a title, a text and a picture, and its own link in the menu.</div>')
+    + draft.pages.map((p, k) => `<div class="cmsCard"><div class="row"><label class="field" style="flex:3"><span>Page title</span><input type="text" maxlength="40" data-pg="${k}" data-f="title" value="${esc(p.title || '')}"></label>
+      <button class="btn small danger" type="button" data-pgdel="${k}" style="flex:none;align-self:flex-end">Remove</button></div>
+    <label class="field"><span>Text (leave an empty line between paragraphs)</span><textarea rows="5" maxlength="4000" data-pg="${k}" data-f="text">${esc(p.text || '')}</textarea></label>
+    <div class="row"><img class="thumb" alt="" ${p.pic ? `data-cthumb="cms-page-${esc(p.slug)}"` : ''} hidden><label class="field"><span>Picture (optional)</span><input type="file" accept="image/*" data-pgimg="${k}"></label></div>
+    <label class="tog"><input type="checkbox" data-pgmenu="${k}" ${p.menu === false ? '' : 'checked'}><span>Show it in the menu</span></label></div>`).join('')
+    + (draft.pages.length < 8 ? '<button class="btn block" type="button" id="pgAdd">Add a page</button>' : '');
+  fillThumbs($('#cmsPages'));
+}
+function buildCms(){
+  if (!draft) loadDraft();
+  $('#cmsGroups').innerHTML = CMS.groups.map(g => `<details class="grp"><summary>${esc(g.title)}</summary><div class="grp-in">
+    ${g.hide ? `<label class="tog"><input type="checkbox" data-show="${esc(g.hide)}" ${draft.hide[g.hide] ? '' : 'checked'}><span>Show this part on the website</span></label>` : ''}
+    ${g.fields.map(f => f.img ? slot(f.l, f.k, !!draft.i[f.k], `data-ik="${esc(f.k)}"`)
+      : `<label class="field"><span>${esc(f.l)}</span>${f.area ? `<textarea rows="2" maxlength="600" data-k="${esc(f.k)}" placeholder="${esc(f.d)}">${esc(draft.t[f.k] || '')}</textarea>` : `<input type="text" maxlength="120" data-k="${esc(f.k)}" placeholder="${esc(f.d)}" value="${esc(draft.t[f.k] || '')}" autocomplete="off">`}</label>`).join('')}</div></details>`).join('');
+  fillThumbs($('#cmsGroups'));
+  $('#fxEffect').value = draft.fx.effect || 'wipe'; $('#fxSeconds').value = num(draft.fx.seconds) || 6.5; $('#fxZoom').checked = draft.fx.zoom !== false;
+  $('#fxReveal').checked = draft.fx.reveal !== false; $('#fxMarquee').checked = draft.fx.marquee !== false; $('#fxWords').value = draft.fx.words || '';
+  buildStory(); buildPages(); cmsBuilt = true;
+}
+const savePic = async (id, u) => { if (!await write(() => db.collection('catalogImg').doc(id).set({img:u, at:Date.now()}))) return false; cmsPics.set(id, Promise.resolve(u)); return true; };
+$('#v-web').addEventListener('input', e => {
+  const t = e.target; if (!draft) return;
+  if (t.dataset.k) { const v = t.value.trim(); if (v) draft.t[t.dataset.k] = v; else delete draft.t[t.dataset.k]; cmsDirty = true; }
+  else if (t.dataset.st != null && t.dataset.f) { draft.story[+t.dataset.st][t.dataset.f] = t.value; cmsDirty = true; }
+  else if (t.dataset.pg != null && t.dataset.f) { draft.pages[+t.dataset.pg][t.dataset.f] = t.value; cmsDirty = true; }
+  else if (t.id === 'fxSeconds') { draft.fx.seconds = Math.min(20, Math.max(3, num(t.value) || 6.5)); cmsDirty = true; }
+  else if (t.id === 'fxWords') { draft.fx.words = t.value.trim(); cmsDirty = true; }
+});
+$('#v-web').addEventListener('change', e => {
+  const t = e.target; if (!draft || !db) return;
+  if (t.dataset.show) { draft.hide[t.dataset.show] = !t.checked; cmsDirty = true; }
+  else if (t.id === 'fxEffect') { draft.fx.effect = t.value; cmsDirty = true; }
+  else if (t.id === 'fxZoom') { draft.fx.zoom = t.checked; cmsDirty = true; }
+  else if (t.id === 'fxReveal') { draft.fx.reveal = t.checked; cmsDirty = true; }
+  else if (t.id === 'fxMarquee') { draft.fx.marquee = t.checked; cmsDirty = true; }
+  else if (t.dataset.pgmenu != null) { draft.pages[+t.dataset.pgmenu].menu = t.checked; cmsDirty = true; }
+  else if (t.type === 'file' && t.files[0] && (t.dataset.ik || t.dataset.stimg != null || t.dataset.pgimg != null)) {
+    const row = t.closest('.row'), th = row && row.querySelector('.thumb');
+    shrink(t.files[0], 1400, async u => {
+      let id;
+      if (t.dataset.ik) id = 'cms-' + t.dataset.ik; else if (t.dataset.stimg != null) id = 'cms-story-' + draft.story[+t.dataset.stimg].id; else id = 'cms-page-' + draft.pages[+t.dataset.pgimg].slug;
+      if (!await savePic(id, u)) return;
+      if (t.dataset.ik) draft.i[t.dataset.ik] = Date.now(); else if (t.dataset.stimg != null) draft.story[+t.dataset.stimg].pic = Date.now(); else draft.pages[+t.dataset.pgimg].pic = Date.now();
+      if (th) { th.src = u; th.hidden = false; }
+      cmsDirty = true; toast('Picture ready. Press “Publish website changes” to show it.');
+    });
+  }
+});
+$('#v-web').addEventListener('click', async e => {
+  const t = e.target; if (!draft) return;
+  const ir = t.closest('[data-ireset]'); if (ir) { delete draft.i[ir.dataset.ireset]; cmsDirty = true; const th = ir.closest('.row').querySelector('.thumb'); if (th) th.hidden = true; ir.hidden = true; return; }
+  const up = t.closest('[data-stup]'); if (up) { const k = +up.dataset.stup; if (k > 0) { [draft.story[k - 1], draft.story[k]] = [draft.story[k], draft.story[k - 1]]; cmsDirty = true; buildStory(); } return; }
+  const sd = t.closest('[data-stdel]'); if (sd) { if (draft.story.length < 2) { toast('Keep at least one chapter.'); return; } draft.story.splice(+sd.dataset.stdel, 1); cmsDirty = true; buildStory(); return; }
+  if (t.closest('#stAdd')) { draft.story.push({id:'s' + Date.now().toString(36), title:'', text:'', img:'', pic:0}); cmsDirty = true; buildStory(); return; }
+  const pd = t.closest('[data-pgdel]'); if (pd) { draft.pages.splice(+pd.dataset.pgdel, 1); cmsDirty = true; buildPages(); return; }
+  if (t.closest('#pgAdd')) { draft.pages.push({slug:'p' + Date.now().toString(36), title:'', text:'', pic:0, menu:true}); cmsDirty = true; buildPages(); return; }
+  if (t.closest('#cmsSave')) {
+    if (!db) return;
+    const body = {t:draft.t, i:draft.i, hide:draft.hide, fx:draft.fx,
+      story:draft.story.filter(c => (c.title || '').trim() || (c.text || '').trim()).map(c => ({id:String(c.id), title:String(c.title || '').trim(), text:String(c.text || '').trim(), img:String(c.img || ''), pic:num(c.pic)})),
+      pages:draft.pages.filter(p => (p.title || '').trim()).map(p => ({slug:String(p.slug), title:String(p.title).trim(), text:String(p.text || '').trim(), pic:num(p.pic), menu:p.menu !== false})), at:Date.now()};
+    const btn = $('#cmsSave'); btn.disabled = true;
+    if (await write(() => db.doc('site/content').set(body), 'Published. The website shows it on the next visit.')) { content = body; cmsDirty = false; }
+    btn.disabled = false;
+  }
+});
+
 /* banners: public documents site/banner-<id> */
 let banners = [], bnPending = null, bnLight = false;
 $('#bnReady').addEventListener('change', e => { $('#bnTextFields').hidden = e.target.checked; });
@@ -873,9 +1000,11 @@ $('#bnAdd').addEventListener('click', async () => {
   if (!db) return;
   if (!bnPending) { toast('Choose a picture first.'); return; }
   const ready = $('#bnReady').checked, now = Date.now();
-  const body = {type:'banner', img:bnPending, ready, light:bnLight, kicker:ready ? '' : $('#bnKicker').value.trim(), text:ready ? '' : $('#bnText').value.trim(), label:ready ? '' : ($('#bnLabel').value.trim() || 'Shop now'), link:$('#bnLink').value, order:now};
+  const shot = bnPending, picId = 'cms-bn-' + now;
+  const body = {type:'banner', pic:picId, ready, light:bnLight, kicker:ready ? '' : $('#bnKicker').value.trim(), text:ready ? '' : $('#bnText').value.trim(), label:ready ? '' : ($('#bnLabel').value.trim() || 'Shop now'), link:$('#bnLink').value, order:now};
   const btn = $('#bnAdd'); btn.disabled = true;
-  if (await write(() => db.collection('site').doc('banner-' + now).set(body), 'Banner added to the website')) {
+  if (await write(() => db.collection('catalogImg').doc(picId).set({img:shot, at:now})) && await write(() => db.collection('site').doc('banner-' + now).set(body), 'Banner added to the website')) {
+    cmsPics.set(picId, Promise.resolve(shot));
     bnPending = null; $('#bnImg').value = ''; $('#bnPrev').hidden = true; $('#bnKicker').value = ''; $('#bnText').value = ''; $('#bnLabel').value = '';
   }
   btn.disabled = false;
@@ -1104,7 +1233,8 @@ $('#exportBtn').addEventListener('click', async () => {
     db.doc('meta/tables').onSnapshot(snap => { tables = snap.exists ? {...(snap.data() || {})} : {}; render(); }, () => {});
     db.collection('catalog').onSnapshot(snap => { catalog = new Map(snap.docs.map(d => [d.id, d.data() || {}])); catReady = true; reconcile(); }, () => {});
     db.doc('site/settings').onSnapshot(snap => { if (snap.exists) siteSet = Object.assign({}, siteSet, snap.data() || {}); render(); }, () => {});
-    db.collection('site').onSnapshot(snap => { banners = snap.docs.filter(d => d.id.indexOf('banner-') === 0).map(d => Object.assign({id:d.id}, d.data() || {})).sort((x, y) => num(x.order) - num(y.order)); render(); }, () => {});
+    db.collection('site').onSnapshot(snap => { banners = snap.docs.filter(d => d.id.indexOf('banner-') === 0).map(d => Object.assign({id:d.id}, d.data() || {})).sort((x, y) => num(x.order) - num(y.order));
+      const cd = snap.docs.find(d => d.id === 'content'); content = cd ? (cd.data() || {}) : null; contentReady = true; if (!cmsDirty) { loadDraft(); cmsBuilt = false; } render(); }, () => {});
   });
 })();
 })();
