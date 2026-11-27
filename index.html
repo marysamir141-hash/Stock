@@ -401,6 +401,22 @@ input[type=range]{min-height:36px;padding:0;box-shadow:none;accent-color:var(--a
       <div class="stat"><b id="tProfit">0</b><span>EGP net profit</span></div>
     </div>
     <div class="note" id="salesNote" hidden></div>
+    <div class="acard">
+      <div class="acard-h"><div><h3>Expenses</h3><small>Anything you paid that is not the piece itself or the table.</small></div><div class="tools"><b id="exTotal" style="font-family:var(--display);font-weight:500">0</b></div></div>
+      <div class="agrid" style="grid-template-columns:1fr">
+        <div class="row">
+          <label class="field" style="flex:2"><span>What was it for</span><input id="exWhat" type="text" maxlength="60" placeholder="e.g. Gift boxes" autocomplete="off"></label>
+          <label class="field"><span>Amount (EGP)</span><input id="exAmt" type="number" inputmode="decimal" min="0" step="any"></label>
+        </div>
+        <div class="row">
+          <label class="field"><span>Kind</span><select id="exCat"><option>Packaging</option><option>Transport</option><option>Materials</option><option>Tools</option><option>Ads</option><option>Delivery</option><option>Other</option></select></label>
+          <label class="field"><span>Belongs to</span><select id="exBaz"></select></label>
+          <label class="field"><span>Paid by</span><select id="exBy"></select></label>
+        </div>
+        <button class="btn primary block" id="exAdd" type="button">Add this expense</button>
+        <div class="list" id="exList"></div>
+      </div>
+    </div>
     <div class="row">
       <label class="field"><span>Partner 1</span><input id="pA" type="text" autocomplete="off"></label>
       <label class="field"><span>Partner 2</span><input id="pB" type="text" autocomplete="off"></label>
@@ -430,7 +446,7 @@ input[type=range]{min-height:36px;padding:0;box-shadow:none;accent-color:var(--a
     <div class="pv-bar"><b>Preview, not published yet</b><div class="seg"><button type="button" data-pvw="100%" aria-pressed="true">Laptop</button><button type="button" data-pvw="400px" aria-pressed="false">Phone</button></div><button class="btn small" type="button" id="pvClose">Close</button></div>
     <div class="pv-stage"><iframe id="pvFrame" title="Website preview"></iframe></div>
   </div>
-  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 19</div>
+  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 20</div>
 </main>
 
 <nav class="nav" id="nav" hidden><img class="nav-logo" src="logo.svg" width="3093" height="882" alt=""><div class="nav-in">
@@ -542,6 +558,9 @@ let ready = {p:false, s:false};
 let tables = {}, priceTouched = false, tableShare = 0, tableApplied = false, tableArmed = false;
 const mem = { get(k){ try { return localStorage.getItem('emem.' + k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem('emem.' + k, v); } catch(e){} } };
 let selectMode = false, selArmed = false, shownCodes = []; const selected = new Set();
+let expenses = [];
+const expOf = f => expenses.filter(x => f === '__all' || x.bazaar === f);
+const expSum = f => expOf(f).reduce((a, x) => a + num(x.amount), 0);
 let webFee = 0, pA = 'Partner 1', pB = 'Partner 2', shareA = 50, keep = 30;
 const settingsBody = () => ({bazaar, webFee, pA, pB, shareA, keep});
 const splitOf = net => { const kept = net > 0 ? Math.round(net * keep / 100) : 0, pool = Math.max(0, net - kept), a = Math.round(pool * shareA / 100); return {kept, a, b: pool - a}; };
@@ -590,7 +609,7 @@ function renderHome(all){
   $('#hLeft').textContent = all.reduce((a,p) => a + p.left, 0);
   $('#hValue').textContent = money(all.reduce((a,p) => a + p.left * num(p.price), 0));
   $('#hRev').textContent = money(sales.reduce((a,s) => a + num(s.qty) * num(s.price), 0));
-  $('#hNet').textContent = money(grossOf(sales) - Object.values(tables).reduce((a,v) => a + num(v), 0));
+  $('#hNet').textContent = money(grossOf(sales) - Object.values(tables).reduce((a,v) => a + num(v), 0) - expSum('__all'));
   const row = (a, sub, v, frac) => `<div class="rw"><div><div class="nm">${a}</div>${sub ? `<small>${sub}</small>` : ''}</div><div class="price">${v}</div>${frac == null ? '' : `<div class="bar2"><i style="width:${Math.max(2, Math.round(frac * 100))}%"></i></div>`}</div>`;
   const none = t => `<div class="rw"><small>${t}</small></div>`;
   const byB = {}, byC = {};
@@ -668,7 +687,7 @@ function renderStock(all){
     <button class="btn small" type="button" data-edit="${esc(p.code)}">Edit</button>`}</div>`).join('');
 }
 function renderSales(){
-  const names = [...new Set([...sales.map(s => s.bazaar), ...Object.keys(tables).filter(k => num(tables[k]) > 0)])];
+  const names = [...new Set([...sales.map(s => s.bazaar), ...Object.keys(tables).filter(k => num(tables[k]) > 0), ...expenses.map(x => x.bazaar).filter(Boolean)])];
   if (salesFilter !== '__all' && !names.includes(salesFilter)) salesFilter = '__all';
   const sel = $('#salesFilter');
   sel.innerHTML = `<option value="__all">All bazaars</option>` + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
@@ -679,14 +698,26 @@ function renderSales(){
   $('#tRev').textContent = money(rev);
   const gross = grossOf(rows);
   const tsum = salesFilter === '__all' ? Object.values(tables).reduce((a,v) => a + num(v), 0) : num(tables[salesFilter]);
-  $('#tProfit').textContent = money(gross - tsum);
-  $('#salesNote').hidden = !tsum;
-  if (tsum) $('#salesNote').textContent = `Profit on pieces ${money(gross)} − table ${money(tsum)} = ${money(gross - tsum)} EGP net.`;
-  const net = gross - tsum, capital = rows.reduce((a,s) => a + num(s.qty) * num(s.cost), 0), sp = splitOf(net);
+  const esum = expSum(salesFilter), exRows = expOf(salesFilter).sort((a,b) => num(b.at) - num(a.at));
+  $('#tProfit').textContent = money(gross - tsum - esum);
+  $('#salesNote').hidden = !(tsum || esum);
+  $('#salesNote').textContent = `Profit on pieces ${money(gross)}` + (tsum ? ` − table ${money(tsum)}` : '') + (esum ? ` − expenses ${money(esum)}` : '') + ` = ${money(gross - tsum - esum)} EGP net.`
+    + (salesFilter === '__all' ? '' : ' Expenses marked “General” only count under All bazaars.');
+  $('#exTotal').textContent = money(esum) + ' EGP';
+  const xb = $('#exBaz'), xy = $('#exBy'), keepB = xb.value, keepY = xy.value;
+  xb.innerHTML = '<option value="">General (no bazaar)</option>' + allBazaars().map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  xb.value = xb.dataset.touched && [...xb.options].some(o => o.value === keepB) ? keepB : (salesFilter !== '__all' && [...xb.options].some(o => o.value === salesFilter) ? salesFilter : '');
+  xy.innerHTML = `<option value="">Not noted</option><option value="A">${esc(pA)}</option><option value="B">${esc(pB)}</option>`; xy.value = keepY;
+  $('#exList').innerHTML = exRows.length ? exRows.map(x => `<div class="item"><div class="info"><div class="nm">${esc(x.what || x.cat || 'Expense')}</div>
+      <div class="meta"><span class="pill web">${esc(x.cat || 'Other')}</span><span>${esc(x.bazaar || 'General')}</span>${x.by ? `<span>paid by ${esc(x.by === 'A' ? pA : pB)}</span>` : ''}<span>${esc(new Date(num(x.at)).toLocaleDateString('en-GB', {day:'numeric', month:'short'}))}</span></div></div>
+      <div class="price">${money(x.amount)}</div><button class="btn small danger" type="button" data-exdel="${esc(x.id)}">Delete</button></div>`).join('')
+    : '<div class="empty" style="padding:18px">No expenses here yet.</div>';
+  const paidA = exRows.filter(x => x.by === 'A').reduce((a,x) => a + num(x.amount), 0), paidB = exRows.filter(x => x.by === 'B').reduce((a,x) => a + num(x.amount), 0);
+  const net = gross - tsum - esum, capital = rows.reduce((a,s) => a + num(s.qty) * num(s.cost), 0), sp = splitOf(net);
   $('#lblA').textContent = pA + ' %'; $('#lblB').textContent = pB + ' %';
   for (const [id, v] of [['pA', pA], ['pB', pB], ['shareA', shareA], ['shareB', 100 - shareA], ['keep', keep]]) if (document.activeElement !== $('#' + id)) $('#' + id).value = v;
   const line = (label, v) => `<div class="item"><div class="info"><div class="nm">${esc(label)}</div></div><div class="price">${money(v)}</div></div>`;
-  $('#splitList').innerHTML = line('Stock money back to whoever paid it', capital) + line('Net profit after the table', net)
+  $('#splitList').innerHTML = line('Stock money back to whoever paid it', capital) + (paidA ? line(`Expenses to give back to ${pA}`, paidA) : '') + (paidB ? line(`Expenses to give back to ${pB}`, paidB) : '') + line('Net profit after table and expenses', net)
     + (net > 0 ? line(`Stays in the brand (${keep}%)`, sp.kept) + line(`${pA} (${shareA}%)`, sp.a) + line(`${pB} (${100 - shareA}%)`, sp.b)
       : `<div class="empty">No profit to split yet.</div>`);
   const el = $('#salesList');
@@ -810,6 +841,8 @@ document.addEventListener('click', async e => {
   if (pl && db) { const p = products.get(pl.dataset.plus); if (!p) return;
     const body = {...p, qty: num(p.qty) + 1}; pl.disabled = true;
     await write(() => db.collection('products').doc(p.code).set(body), `${p.code}: one more piece added (${body.qty} in total)`); pl.disabled = false; return; }
+  const xd = t.closest('[data-exdel]');
+  if (xd && db) { if (xd.dataset.armed !== '1') { xd.dataset.armed = '1'; xd.textContent = 'Sure?'; return; } xd.disabled = true; await write(() => db.collection('expenses').doc(xd.dataset.exdel).delete(), 'Expense removed'); return; }
   const u = t.closest('[data-undo]');
   if (u && db) {
     if (u.dataset.armed !== '1') { u.dataset.armed = '1'; u.textContent = 'Sure?'; return; }
@@ -817,6 +850,16 @@ document.addEventListener('click', async e => {
   }
 });
 $('#addBtn').addEventListener('click', () => openProd(null));
+$('#exBaz').addEventListener('change', e => { e.target.dataset.touched = '1'; });
+$('#exAdd').addEventListener('click', async () => {
+  if (!db) return;
+  const amount = num($('#exAmt').value), what = $('#exWhat').value.trim();
+  if (!(amount > 0)) { toast('Write the amount first.'); return; }
+  const body = {what, amount, cat:$('#exCat').value, bazaar:$('#exBaz').value, by:$('#exBy').value, at:Date.now()};
+  $('#exAdd').disabled = true;
+  if (await write(() => db.collection('expenses').add(body), 'Expense added')) { $('#exWhat').value = ''; $('#exAmt').value = ''; }
+  $('#exAdd').disabled = false;
+});
 $('#selToggle').addEventListener('click', () => { selectMode = !selectMode; selected.clear(); selArmed = false; render(); });
 $('#selDone').addEventListener('click', () => { selectMode = false; selected.clear(); selArmed = false; render(); });
 for (const [id, on] of [['selShow', true], ['selHide', false]]) $('#' + id).addEventListener('click', async e => {
@@ -1381,7 +1424,11 @@ $('#exportBtn').addEventListener('click', async () => {
     const b = byB[s.bazaar] || (byB[s.bazaar] = [0,0,0]); b[0] += num(s.qty); b[1] += tot; b[2] += prof;
   }
   for (const k of Object.keys(tables)) if (num(tables[k]) > 0 && !byB[k]) byB[k] = [0,0,0];
-  const B = [['Bazaar','Pieces','Revenue','Profit on pieces','Table cost','Net profit','Stays in brand',pA,pB], ...Object.entries(byB).map(([k,v]) => { const n = v[2] - num(tables[k]), sp = splitOf(n); return [k, ...v, num(tables[k]), n, sp.kept, sp.a, sp.b]; })];
+  for (const x of expenses) if (x.bazaar && !byB[x.bazaar]) byB[x.bazaar] = [0,0,0];
+  const B = [['Bazaar','Pieces','Revenue','Profit on pieces','Table cost','Expenses','Net profit','Stays in brand',pA,pB], ...Object.entries(byB).map(([k,v]) => { const ex = expSum(k), n = v[2] - num(tables[k]) - ex, sp = splitOf(n); return [k, ...v, num(tables[k]), ex, n, sp.kept, sp.a, sp.b]; })];
+  const gen = expenses.filter(x => !x.bazaar).reduce((a,x) => a + num(x.amount), 0); if (gen) B.push(['General expenses', 0, 0, 0, 0, gen, -gen, 0, 0, 0]);
+  const X = [['Date','What','Kind','Bazaar','Paid by','Amount']];
+  for (const x of [...expenses].sort((a,b) => num(a.at) - num(b.at))) X.push([new Date(num(x.at) - new Date(num(x.at)).getTimezoneOffset() * 60000), x.what || '', x.cat || '', x.bazaar || 'General', x.by === 'A' ? pA : x.by === 'B' ? pB : '', num(x.amount)]);
   const wb = new ExcelJS.Workbook();
   const TEAL = 'FF457373', DARK = 'FF2C4A4A', SAND = 'FFFBECEA', CREAM = 'FFFFFFFF', STAR = 'FFFDF5F4', FONT = 'Century Gothic';
   const fill = c => ({type:'pattern', pattern:'solid', fgColor:{argb:c}});
@@ -1418,7 +1465,8 @@ $('#exportBtn').addEventListener('click', async () => {
   };
   add(A, 'Products', [9,30,12,12,11,8,8,11,9,10,7,7,12,13], [10,11,12,13]);
   add(S, 'Sales', [20,28,9,30,6,11,10,10,10], [5,7,9]);
-  add(B, 'Bazaars', [30,9,12,16,12,12,14,14,14], [2,3,4,5,6,7,8,9]);
+  add(B, 'Bazaars', [30,9,12,16,12,12,12,14,14,14], [2,3,4,5,6,7]);
+  add(X, 'Expenses', [20,30,14,26,16,12], [6]);
   add(L, 'Labels', [10,30,10]);
   let data;
   try { data = await wb.xlsx.writeBuffer(); } catch (e) { toast('Could not build the Excel file.'); return; }
@@ -1478,6 +1526,7 @@ $('#exportBtn').addEventListener('click', async () => {
       if (st.shareA != null) shareA = num(st.shareA); if (st.keep != null) keep = num(st.keep);
       bazaar = String(st.bazaar || ''); render();
     }, () => {});
+    db.collection('expenses').onSnapshot(snap => { expenses = snap.docs.map(d => Object.assign({id:d.id}, d.data() || {})).map(x => ({...x, bazaar:String(x.bazaar || '')})); render(); }, () => {});
     db.doc('meta/tables').onSnapshot(snap => { tables = snap.exists ? {...(snap.data() || {})} : {}; render(); }, () => {});
     db.collection('catalog').onSnapshot(snap => { catalog = new Map(snap.docs.map(d => [d.id, d.data() || {}])); catReady = true; reconcile(); }, () => {});
     db.doc('site/settings').onSnapshot(snap => { if (snap.exists) siteSet = Object.assign({}, siteSet, snap.data() || {}); if (!admDirty) loadAdm(); render(); }, () => {});
