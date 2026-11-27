@@ -83,12 +83,22 @@ input[type=search]{padding-left:42px;background:var(--surface) url("data:image/s
 .pill.in{background:var(--good-soft);color:var(--good)}
 .pill.out{background:var(--bad-soft);color:var(--bad)}
 .pill.hm{background:var(--blush);color:#8a4a40}
+.pill.web{background:var(--accent-soft);color:var(--accent-2)}
+.tog{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px;cursor:pointer}
+.tog input{flex:none;width:22px;height:22px;min-height:0;padding:0;box-shadow:none;accent-color:var(--accent)}
+#webFields{display:flex;flex-direction:column;gap:14px}
+#pImgPrev{flex:none;width:72px;height:86px;object-fit:cover;border-radius:12px;background:var(--sunk)}
+input[type=file]{padding:10px;font-size:13px}
+textarea{width:100%;padding:12px 14px;background:var(--surface);border:1.5px solid transparent;border-radius:14px;box-shadow:var(--ring);font:inherit;color:inherit;resize:vertical}
+textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(69,115,115,.14)}
+#selBar{flex-wrap:wrap}
+#selBar>*{flex:none}
 .empty{padding:34px 20px;text-align:center;color:var(--muted);background:var(--surface);border-radius:18px;box-shadow:var(--lift)}
 .empty b{display:block;margin-bottom:4px;color:var(--ink);font-family:var(--display);font-size:18px;font-weight:500}
 .chk{flex:none;width:22px;height:22px;min-height:0;padding:0;box-shadow:none;accent-color:var(--accent);pointer-events:none}
 
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:9;pointer-events:none;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-.nav-in{pointer-events:auto;display:flex;gap:4px;max-width:340px;padding:6px;border-radius:24px;background:rgba(255,255,255,.86);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px);box-shadow:0 0 0 1px rgba(31,51,51,.05),0 14px 34px rgba(31,51,51,.18)}
+.nav-in{pointer-events:auto;display:flex;gap:4px;max-width:400px;padding:6px;border-radius:24px;background:rgba(255,255,255,.86);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px);box-shadow:0 0 0 1px rgba(31,51,51,.05),0 14px 34px rgba(31,51,51,.18)}
 .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;border:0;border-radius:18px;background:none;color:var(--muted);font-size:11.5px;font-weight:500;transition:background .15s,color .15s}
 .nav button svg{width:22px;height:22px}
 .nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent-2)}
@@ -245,11 +255,14 @@ input[type=search]{padding-left:42px;background:var(--surface) url("data:image/s
       <button class="chip" type="button" data-f="out" aria-pressed="false">Sold out</button>
       <button class="chip" type="button" data-f="stainless" aria-pressed="false">Stainless</button>
       <button class="chip" type="button" data-f="handmade" aria-pressed="false">Handmade</button>
+      <button class="chip" type="button" data-f="web" aria-pressed="false">On website</button>
       <button class="chip" type="button" id="selToggle" aria-pressed="false">Select several</button>
     </div>
     <div class="row" id="selBar" hidden>
       <button class="btn small" id="selAll" type="button">Select all</button>
       <button class="btn small danger" id="selDel" type="button">Delete 0</button>
+      <button class="btn small" id="selShow" type="button">Show on site</button>
+      <button class="btn small" id="selHide" type="button">Hide</button>
       <button class="btn small" id="selDone" type="button">Done</button>
     </div>
     <div class="list" id="stockList"></div>
@@ -282,7 +295,24 @@ input[type=search]{padding-left:42px;background:var(--surface) url("data:image/s
     <div class="list" id="salesList"></div>
   </div>
   </section>
-  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 12</div>
+  <!-- WEBSITE -->
+  <section id="v-web" class="view" hidden>
+    <div class="note" id="webCount"></div>
+    <label class="field"><span>WhatsApp number that receives the orders (with country code)</span>
+      <input id="wsPhone" type="tel" inputmode="tel" placeholder="201001234567" autocomplete="off"></label>
+    <label class="tog"><input id="wsOfferShow" type="checkbox"><span>Show an offer line at the top of the website</span></label>
+    <label class="field"><span>Offer line</span><input id="wsOffer" type="text" maxlength="90" placeholder="e.g. Free delivery this week" autocomplete="off"></label>
+    <label class="field"><span>Discount on every piece (%)</span><input id="wsDisc" type="number" inputmode="decimal" min="0" max="90" step="any" placeholder="0"></label>
+    <label class="tog"><input id="wsBzShow" type="checkbox"><span>Show the next bazaar on the website</span></label>
+    <div class="row">
+      <label class="field" style="flex:2"><span>Bazaar name</span><input id="wsBzName" type="text" autocomplete="off"></label>
+      <label class="field"><span>Date</span><input id="wsBzDate" type="text" placeholder="Fri 4 Dec" autocomplete="off"></label>
+    </div>
+    <label class="field"><span>Place</span><input id="wsBzPlace" type="text" autocomplete="off"></label>
+    <button class="btn primary block" id="wsSave" type="button">Save website settings</button>
+    <div class="note">The website only gets what you switch on: the pieces marked “Show this piece on the website” with their name, price and photo, and the lines on this page. Costs, sales, table costs, bazaar history and partner shares never leave this system.</div>
+  </section>
+  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 14</div>
 </main>
 
 <nav class="nav" id="nav" hidden><img class="nav-logo" src="logo.png" width="640" height="177" alt=""><div class="nav-in">
@@ -290,6 +320,7 @@ input[type=search]{padding-left:42px;background:var(--surface) url("data:image/s
   <button type="button" data-v="sell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l1 12H5L6 8z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/></svg>Sell</button>
   <button type="button" data-v="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.6"/></svg>Stock</button>
   <button type="button" data-v="sales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>Sales</button>
+  <button type="button" data-v="web"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.600 0 17M12 3.5c-2.600 2.400-2.600 14.600 0 17"/></svg>Website</button>
 </div></nav>
 
 <!-- Sell sheet -->
@@ -332,6 +363,22 @@ input[type=search]{padding-left:42px;background:var(--surface) url("data:image/s
     <label class="field"><span>Quantity in stock</span><input id="pQty" type="number" inputmode="numeric" min="1" step="1" value="1" required></label>
   </div>
   <div class="note" id="pCalc">Total cost 0 EGP</div>
+  <label class="tog"><input id="pWeb" type="checkbox"><span>Show this piece on the website</span></label>
+  <div id="webFields" hidden>
+    <div class="row">
+      <label class="field"><span>Offer price (optional)</span><input id="pOffer" type="number" inputmode="decimal" min="0" step="any" placeholder="no offer"></label>
+      <label class="field"><span>Collection label (optional)</span><input id="pTag" type="text" maxlength="24" placeholder="e.g. Pharaonic" autocomplete="off"></label>
+    </div>
+    <label class="field"><span>One line about it (shows on the card)</span><input id="pNote" type="text" maxlength="110" autocomplete="off"></label>
+    <label class="field"><span>Description (on the piece's own page)</span><textarea id="pDesc" rows="3" maxlength="600"></textarea></label>
+    <label class="field"><span>Material</span><input id="pMat" type="text" maxlength="80" placeholder="e.g. Stainless steel, gold tone" autocomplete="off"></label>
+    <label class="field"><span>How to care (leave empty for the standard text)</span><textarea id="pCare" rows="2" maxlength="400"></textarea></label>
+    <label class="tog"><input id="pStone" type="checkbox"><span>Made with stones (also shows on the Stones page)</span></label>
+    <div class="row" style="align-items:center">
+      <img id="pImgPrev" alt="" hidden>
+      <label class="field"><span>Photo for the website</span><input id="pImg" type="file" accept="image/*"></label>
+    </div>
+  </div>
   <div class="row">
     <button class="btn" type="button" data-close>Cancel</button>
     <button class="btn primary" type="submit" id="prodGo">Save product</button>
@@ -366,7 +413,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num = v => { const n = Number(v); return isFinite(n) ? n : 0; };
 const money = n => Math.round(num(n)).toLocaleString('en-US');
-const TYPES = {necklace:['N','Necklace'],bracelet:['B','Bracelet'],ring:['R','Ring'],earrings:['E','Earrings'],anklet:['A','Anklet'],set:['S','Set'],other:['X','Other']};
+const TYPES = {necklace:['N','Necklace'],bracelet:['B','Bracelet'],bangle:['G','Bangle'],ring:['R','Ring'],earrings:['E','Earrings'],anklet:['A','Anklet'],set:['S','Set'],other:['X','Other']};
 const NO_BAZAAR = 'No bazaar name';
 
 let db = null, downloads = null;
@@ -408,8 +455,8 @@ function render(){
   if (!ready.p || !ready.s) return;
   $('#status').hidden = true; $('#nav').hidden = false; document.body.classList.add('in');
   if (downloads) $('#exportBtn').hidden = false;
-  for (const v of ['home','sell','stock','sales']) $('#v-' + v).hidden = v !== view;
-  $('#pageTitle').textContent = {home:'Dashboard', sell:'Sell', stock:'Stock', sales:'Sales'}[view];
+  for (const v of ['home','sell','stock','sales','web']) $('#v-' + v).hidden = v !== view;
+  $('#pageTitle').textContent = {home:'Dashboard', sell:'Sell', stock:'Stock', sales:'Sales', web:'Website'}[view];
   document.querySelectorAll('#nav button').forEach(b => b.dataset.v === view ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current'));
   const sold = soldMap();
   const all = [...products.values()].map(p => ({...p, left: Math.max(0, num(p.qty) - (sold[p.code] || 0))}))
@@ -418,6 +465,8 @@ function render(){
   if (view === 'sell') renderSell(all);
   if (view === 'stock') renderStock(all);
   if (view === 'sales') renderSales();
+  if (view === 'web') renderWeb();
+  reconcile();
 }
 function renderHome(all){
   $('#hLeft').textContent = all.reduce((a,p) => a + p.left, 0);
@@ -482,7 +531,7 @@ function renderStock(all){
   if (webFee) $('#webNote').textContent = `Each piece shows a “web” price below: your price raised so that after the website takes ${webFee}% you still get your normal price.`;
   document.querySelectorAll('#stockChips .chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.f === stockFilter));
   const f = stockFilter;
-  const rows = all.filter(p => f === 'all' || (f === 'in' && p.left > 0) || (f === 'out' && p.left === 0) || p.category === f);
+  const rows = all.filter(p => f === 'all' || (f === 'in' && p.left > 0) || (f === 'out' && p.left === 0) || (f === 'web' && p.web) || p.category === f);
   shownCodes = rows.map(p => p.code);
   for (const c of [...selected]) if (!products.has(c)) selected.delete(c);
   $('#selToggle').setAttribute('aria-pressed', selectMode); $('#selBar').hidden = !selectMode;
@@ -494,7 +543,7 @@ function renderStock(all){
     <div class="info"><div class="nm">${esc(p.name)}</div>
       <div class="meta">${tagHtml(p.code)}
         <span class="pill ${p.left ? 'in' : 'out'}">${p.left ? p.left + ' of ' + num(p.qty) + ' left' : 'Sold out'}</span>
-        ${p.category === 'handmade' ? '<span class="pill hm">Handmade</span>' : ''}
+        ${p.category === 'handmade' ? '<span class="pill hm">Handmade</span>' : ''}${p.web ? '<span class="pill web">On website</span>' : ''}
         <span>cost ${money(p.cost)}</span>${webPrice(p) ? `<span>web ${money(webPrice(p))}</span>` : ''}</div></div>
     <div class="price">${money(p.price)}</div>
     ${selectMode ? '' : `<button class="btn small" type="button" data-plus="${esc(p.code)}" aria-label="Add one more piece">+1</button>
@@ -571,8 +620,12 @@ function openProd(code){
   priceTouched = !!p && num(p.price) !== Math.round(num(p.cost) * (num(p.markup) || 2) + num(p.extra) + num(p.tableAdd));
   calc();
   $('#pQty').value = p ? num(p.qty) : 1;
+  $('#pWeb').checked = !!(p && p.web); $('#webFields').hidden = !$('#pWeb').checked;
+  $('#pOffer').value = p && num(p.offer) ? num(p.offer) : ''; $('#pTag').value = p ? (p.tag || '') : ''; $('#pNote').value = p ? (p.note || '') : ''; $('#pDesc').value = p ? (p.desc || '') : ''; $('#pMat').value = p ? (p.material || '') : ''; $('#pCare').value = p ? (p.care || '') : '';
+  $('#pStone').checked = !!(p && p.stone); $('#pImg').value = ''; pendingImg = null;
+  $('#pImgPrev').hidden = true; $('#pImgPrev').removeAttribute('src');
+  if (p && p.hasImg && db) { const want = code; db.collection('catalogImg').doc(code).get().then(d => { const u = d.exists ? (d.data() || {}).img : ''; if (u && editing === want && !pendingImg) { $('#pImgPrev').src = u; $('#pImgPrev').hidden = false; } }).catch(() => {}); }
   $('#pType').value = p && TYPES[p.type] ? p.type : 'necklace';
-  $('#pType').disabled = !!p;
   $('#prodDel').hidden = !p; $('#prodDel').textContent = 'Delete this product'; $('#prodCopy').hidden = !p;
   setCat(p ? p.category : formCat);
   $('#prodSheet').hidden = false;
@@ -596,11 +649,14 @@ $('#prodForm').addEventListener('submit', async e => {
   e.preventDefault(); if (!db) return;
   const code = editing || nextCode(formCat, $('#pType').value);
   const old = editing ? products.get(editing) : null;
-  const body = {code, name:$('#pName').value.trim(), category: formCat, type: old ? old.type : $('#pType').value,
+  const body = {code, name:$('#pName').value.trim(), category: formCat, type: $('#pType').value,
     costPiece:num($('#pCost').value), costBag:num($('#pBag').value), costClasp:num($('#pClasp').value), cost:calc(),
-    markup:num($('#pMul').value) || 2, extra:num($('#pExtra').value), tableAdd: old ? num(old.tableAdd) : 0, price:num($('#pPrice').value), qty:Math.max(1, Math.floor(num($('#pQty').value))), createdAt: old ? num(old.createdAt) : Date.now()};
+    markup:num($('#pMul').value) || 2, extra:num($('#pExtra').value), tableAdd: old ? num(old.tableAdd) : 0, price:num($('#pPrice').value), qty:Math.max(1, Math.floor(num($('#pQty').value))), createdAt: old ? num(old.createdAt) : Date.now(),
+    web:$('#pWeb').checked, offer:num($('#pOffer').value), tag:$('#pTag').value.trim(), note:$('#pNote').value.trim(), desc:$('#pDesc').value.trim(), material:$('#pMat').value.trim(), care:$('#pCare').value.trim(), stone:$('#pStone').checked, hasImg: !!pendingImg || !!(old && old.hasImg)};
   if (!body.name) return;
   $('#prodGo').disabled = true;
+  const shot = pendingImg;
+  if (shot && !await write(() => db.collection('catalogImg').doc(code).set({img:shot, at:Date.now()}))) { $('#prodGo').disabled = false; return; }
   const ok = await write(() => db.collection('products').doc(code).set(body), editing ? 'Saved' : `Added. Write ${code} on the label`);
   $('#prodGo').disabled = false;
   if (ok) { mem.set('bag', $('#pBag').value); mem.set('clasp', $('#pClasp').value); mem.set('mul', $('#pMul').value); mem.set('extra', $('#pExtra').value); $('#prodSheet').hidden = true; editing = null; }
@@ -645,6 +701,12 @@ document.addEventListener('click', async e => {
 $('#addBtn').addEventListener('click', () => openProd(null));
 $('#selToggle').addEventListener('click', () => { selectMode = !selectMode; selected.clear(); selArmed = false; render(); });
 $('#selDone').addEventListener('click', () => { selectMode = false; selected.clear(); selArmed = false; render(); });
+for (const [id, on] of [['selShow', true], ['selHide', false]]) $('#' + id).addEventListener('click', async e => {
+  if (!db || !selected.size) { toast('Tick the pieces first.'); return; }
+  const btn = e.currentTarget, codes = [...selected]; btn.disabled = true; let n = 0;
+  for (const c of codes) { const p = products.get(c); if (!p || !!p.web === on) continue; const body = {...p, web:on}; if (!await write(() => db.collection('products').doc(c).set(body))) break; n++; }
+  btn.disabled = false; toast(on ? `${n} pieces now show on the website` : `${n} pieces hidden from the website`);
+});
 $('#selAll').addEventListener('click', () => { const all = shownCodes.every(c => selected.has(c)); for (const c of shownCodes) all ? selected.delete(c) : selected.add(c); selArmed = false; render(); });
 $('#selDel').addEventListener('click', async () => {
   if (!db || !selected.size) return;
@@ -722,6 +784,59 @@ $('#tableCost').addEventListener('change', e => {
   tables = {...tables, [curBazaar()]: num(e.target.value)}; render();
   const body = tables;
   if (db) write(() => db.doc('meta/tables').set(body), 'Table cost saved');
+});
+
+/* ---------- website link: public copies of the pieces that are switched on ---------- */
+let catalog = new Map(), catReady = false, recT = 0, recBusy = false, pendingImg = null;
+let siteSet = {whatsapp:'', offerShow:false, offerText:'', discount:0, bazaar:{show:false, name:'', date:'', place:''}}, siteDirty = false;
+const WEBCAT = {necklace:'necklaces', bracelet:'bracelets', bangle:'bangles', earrings:'earrings'};
+const PUB = ['code','name','cat','kind','stone','tag','note','desc','material','care','price','offer','sold','left','hasImg','at'];
+function publicOf(p, left){
+  const price = webFee > 0 ? webPrice(p) : Math.max(0, num(p.price) - num(p.tableAdd)), offer = num(p.offer);
+  return {code:p.code, name:String(p.name || p.code), cat:WEBCAT[p.type] || 'other', kind:p.category === 'handmade' ? 'handmade' : 'stainless', stone:!!p.stone,
+    tag:String(p.tag || ''), note:String(p.note || ''), desc:String(p.desc || ''), material:String(p.material || ''), care:String(p.care || ''), left:Math.max(0, left), price, offer: offer > 0 && offer < price ? offer : 0, sold:left <= 0, hasImg:!!p.hasImg, at:num(p.createdAt)};
+}
+function reconcile(){
+  clearTimeout(recT);
+  recT = setTimeout(async () => {
+    if (!db || !ready.p || !ready.s || !catReady || recBusy) return;
+    recBusy = true;
+    try {
+      const sold = soldMap(), want = new Map();
+      for (const p of products.values()) if (p.web) want.set(p.code, publicOf(p, num(p.qty) - (sold[p.code] || 0)));
+      for (const [c, w] of want) { const have = catalog.get(c) || {}; if (PUB.some(k => have[k] !== w[k])) await db.collection('catalog').doc(c).set(w); }
+      for (const c of [...catalog.keys()]) if (!want.has(c)) { await db.collection('catalog').doc(c).delete(); if (!products.has(c)) await db.collection('catalogImg').doc(c).delete(); }
+    } catch (e) {}
+    recBusy = false;
+  }, 900);
+}
+function renderWeb(){
+  const n = [...products.values()].filter(p => p.web).length, noPic = [...products.values()].filter(p => p.web && !p.hasImg).length;
+  $('#webCount').textContent = `${n} of ${products.size} pieces are on the website.` + (noPic ? ` ${noPic} of them have no photo yet.` : '') + ' Switch a piece on from Stock → Edit, or tick several with “Select several”.';
+  if (siteDirty || $('#v-web').contains(document.activeElement)) return;
+  $('#wsPhone').value = siteSet.whatsapp || ''; $('#wsOfferShow').checked = !!siteSet.offerShow; $('#wsOffer').value = siteSet.offerText || ''; $('#wsDisc').value = num(siteSet.discount) || '';
+  const b = siteSet.bazaar || {}; $('#wsBzShow').checked = !!b.show; $('#wsBzName').value = b.name || bazaar || ''; $('#wsBzDate').value = b.date || ''; $('#wsBzPlace').value = b.place || '';
+}
+$('#v-web').addEventListener('input', () => { siteDirty = true; });
+$('#wsSave').addEventListener('click', async () => {
+  if (!db) return;
+  const body = {whatsapp:$('#wsPhone').value.replace(/\D/g, ''), offerShow:$('#wsOfferShow').checked, offerText:$('#wsOffer').value.trim(), discount:Math.min(90, Math.max(0, num($('#wsDisc').value))),
+    bazaar:{show:$('#wsBzShow').checked, name:$('#wsBzName').value.trim(), date:$('#wsBzDate').value.trim(), place:$('#wsBzPlace').value.trim()}};
+  if (await write(() => db.doc('site/settings').set(body), 'Website settings saved')) { siteSet = body; siteDirty = false; }
+});
+$('#pWeb').addEventListener('change', e => { $('#webFields').hidden = !e.target.checked; });
+$('#pImg').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const url = URL.createObjectURL(f), im = new Image();
+  im.onload = () => {
+    const k = Math.min(1, 760 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+    c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+    pendingImg = c.toDataURL('image/jpeg', .74);
+    $('#pImgPrev').src = pendingImg; $('#pImgPrev').hidden = false;
+  };
+  im.onerror = () => { URL.revokeObjectURL(url); toast('This photo could not be opened. Try a JPG or PNG.'); };
+  im.src = url;
 });
 
 /* ---------- import an old sheet (code + final price) ---------- */
@@ -914,7 +1029,7 @@ $('#exportBtn').addEventListener('click', async () => {
     db = firebase.firestore();
     try { db.settings({ignoreUndefinedProperties:true}); } catch(e) {}
     db.enablePersistence({synchronizeTabs:true}).catch(() => {});
-    const fail = () => { $('#status').hidden = false; $('#nav').hidden = true; document.body.classList.remove('in'); for (const v of ['home','sell','stock','sales']) $('#v-' + v).hidden = true;
+    const fail = () => { $('#status').hidden = false; $('#nav').hidden = true; document.body.classList.remove('in'); for (const v of ['home','sell','stock','sales','web']) $('#v-' + v).hidden = true;
       $('#status').textContent = 'This Google account (' + (user.email || '') + ') is not on the allowed list. Sign out and use a partner account.'; };
     db.collection('products').onSnapshot(snap => {
       products = new Map(snap.docs.map(d => { const x = d.data() || {}; return [d.id, {...x, code:d.id}]; }));
@@ -932,6 +1047,8 @@ $('#exportBtn').addEventListener('click', async () => {
       bazaar = String(st.bazaar || ''); render();
     }, () => {});
     db.doc('meta/tables').onSnapshot(snap => { tables = snap.exists ? {...(snap.data() || {})} : {}; render(); }, () => {});
+    db.collection('catalog').onSnapshot(snap => { catalog = new Map(snap.docs.map(d => [d.id, d.data() || {}])); catReady = true; reconcile(); }, () => {});
+    db.doc('site/settings').onSnapshot(snap => { if (snap.exists) siteSet = Object.assign({}, siteSet, snap.data() || {}); render(); }, () => {});
   });
 })();
 })();
