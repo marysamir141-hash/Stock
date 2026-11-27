@@ -169,6 +169,89 @@ textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba
   .sheet::before{display:none}
   .toast{bottom:28px}
 }
+/* ================= website admin ================= */
+a.btn{text-decoration:none;color:inherit}
+.adm{display:flex;flex-direction:column;gap:16px}
+.adm-nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding:2px 16px}
+.adm-nav::-webkit-scrollbar{display:none}
+.adm-nav button{flex:none;display:flex;align-items:center;gap:9px;min-height:40px;padding:8px 14px;border:0;border-radius:12px;background:var(--surface);box-shadow:var(--ring);color:var(--muted);font-size:13.5px;font-weight:500;white-space:nowrap;transition:background .15s,color .15s}
+.adm-nav button svg{flex:none;width:18px;height:18px}
+.adm-nav button[aria-current="page"]{background:var(--ink);color:#fff;box-shadow:none}
+.adm-main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.adm-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.adm-head h2{margin:0;font-family:var(--display);font-size:22px;font-weight:500;letter-spacing:-.01em}
+.adm-head p{margin:3px 0 0;font-size:13.5px;color:var(--muted);max-width:560px}
+#admBody{display:flex;flex-direction:column;gap:14px}
+.acard{background:var(--surface);border-radius:20px;box-shadow:var(--lift);overflow:hidden}
+.acard-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 0}
+.acard-h h3{margin:0;font-family:var(--display);font-size:16px;font-weight:500}
+.acard-h small{display:block;margin-top:2px;font-size:12.5px;font-weight:400;color:var(--muted)}
+.acard-h .tools{display:flex;align-items:center;gap:6px;flex:none}
+.agrid{display:grid;grid-template-columns:1fr;gap:14px;padding:16px 18px 18px}
+.agrid .wide,.agrid .islot,.agrid .acheck,.agrid .sw,.agrid .note,.agrid .abtns{grid-column:1/-1}
+.field small{font-size:12px;color:var(--muted)}
+.abtns{display:flex;flex-wrap:wrap;gap:8px}
+.ibtn{flex:none;display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:10px;background:var(--bg);box-shadow:var(--ring);font-size:15px;line-height:1}
+.ibtn:disabled{opacity:.35}
+/* switch */
+.sw{display:flex;align-items:center;gap:12px;min-height:40px;cursor:pointer;font-size:14px}
+.sw input{position:absolute;width:1px;height:1px;min-height:0;padding:0;opacity:0;box-shadow:none}
+.sw i{flex:none;position:relative;width:44px;height:26px;border-radius:999px;background:#ddd0ce;transition:background .2s}
+.sw i::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(31,51,51,.25);transition:transform .2s}
+.sw input:checked+i{background:var(--accent)}
+.sw input:checked+i::after{transform:translateX(18px)}
+.sw input:focus-visible+i{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+/* picture slot */
+.islot{display:flex;align-items:center;gap:14px;padding:12px;border-radius:14px;background:var(--bg)}
+.iprev{flex:none;display:grid;place-items:center;width:104px;height:78px;border-radius:10px;overflow:hidden;background:var(--sunk);color:var(--muted);font-size:11.5px;text-align:center}
+.iprev img{width:100%;height:100%;object-fit:cover}
+.imeta{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.imeta b{font-weight:500;font-size:14px}
+.imeta small{font-size:12px;color:var(--muted)}
+.filebtn{position:relative;overflow:hidden;cursor:pointer}
+.filebtn input{position:absolute;inset:0;width:100%;height:100%;min-height:0;padding:0;opacity:0;cursor:pointer}
+/* overview */
+.atiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.atile{display:block;text-align:left;padding:16px 18px;border:0;border-radius:20px;background:var(--surface);box-shadow:var(--lift)}
+.atile b{display:block;font-family:var(--display);font-size:28px;font-weight:500;line-height:1.1;font-variant-numeric:tabular-nums}
+.atile span{display:block;margin-top:4px;font-size:12.5px;color:var(--muted)}
+.atile:first-child{background:linear-gradient(135deg,#558a8a,var(--accent-2));color:#fff}
+.atile:first-child span{color:rgba(255,255,255,.82)}
+.acheck{display:flex;align-items:center;gap:12px;min-height:40px;font-size:14px}
+.acheck i{flex:none;width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px #d8cbc9}
+.acheck.ok i{background:var(--good) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12.5 4 4 8-9'/%3E%3C/svg%3E") center/14px no-repeat;box-shadow:none}
+.acheck span{flex:1}
+/* catalogue rows */
+.atool{display:flex;flex-direction:column;gap:10px}
+.arows{display:flex;flex-direction:column}
+.arow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--line)}
+.arow .info{flex:1 1 180px}
+.athumb{flex:none;display:grid;place-items:center;width:52px;height:60px;border-radius:10px;overflow:hidden;background:var(--sunk);color:var(--muted);font-size:10px;text-align:center}
+.athumb img{width:100%;height:100%;object-fit:cover}
+.amini{flex:none;width:104px}
+.amini input{min-height:38px;padding:6px 10px}
+.aempty{padding:26px 18px;text-align:center;color:var(--muted)}
+input[type=color]{min-height:48px;padding:5px;cursor:pointer}
+input[type=range]{min-height:36px;padding:0;box-shadow:none;accent-color:var(--accent)}
+/* publish bar */
+.adm-bar{position:sticky;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:8;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:16px;background:var(--ink);color:#fff;box-shadow:0 14px 34px rgba(20,32,32,.3)}
+.adm-bar span{flex:1 1 160px;font-size:13.5px}
+.adm-bar .btn{box-shadow:none}
+.adm-bar .btn.primary{background:#fff;color:var(--ink)}
+.adm-bar .btn:not(.primary){background:rgba(255,255,255,.14);color:#fff}
+@media (min-width:900px){
+  .adm{display:grid;grid-template-columns:216px minmax(0,1fr);gap:26px;align-items:start}
+  .adm-nav{position:sticky;top:88px;flex-direction:column;overflow:visible;margin:0;padding:0;gap:4px}
+  .adm-nav button{background:none;box-shadow:none;border-radius:12px;padding:10px 12px}
+  .adm-nav button:hover{background:var(--surface)}
+  .adm-nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent-2)}
+  .agrid .islot{grid-column:auto}
+  .agrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .atiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  .adm-bar{grid-column:2;bottom:18px}
+  #admBody{max-width:880px}
+}
 </style>
 
 <div class="deco" aria-hidden="true"><i></i><i></i></div>
@@ -305,58 +388,16 @@ textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba
     <div class="list" id="salesList"></div>
   </div>
   </section>
-  <!-- WEBSITE -->
-  <section id="v-web" class="view" hidden>
-    <div class="note" id="webCount"></div>
-    <label class="field"><span>WhatsApp number that receives the orders (with country code)</span>
-      <input id="wsPhone" type="tel" inputmode="tel" placeholder="201001234567" autocomplete="off"></label>
-    <label class="tog"><input id="wsOfferShow" type="checkbox"><span>Show an offer line at the top of the website</span></label>
-    <label class="field"><span>Offer line</span><input id="wsOffer" type="text" maxlength="90" placeholder="e.g. Free delivery this week" autocomplete="off"></label>
-    <label class="field"><span>Discount on every piece (%)</span><input id="wsDisc" type="number" inputmode="decimal" min="0" max="90" step="any" placeholder="0"></label>
-    <label class="tog"><input id="wsBzShow" type="checkbox"><span>Show the next bazaar on the website</span></label>
-    <div class="row">
-      <label class="field" style="flex:2"><span>Bazaar name</span><input id="wsBzName" type="text" autocomplete="off"></label>
-      <label class="field"><span>Date</span><input id="wsBzDate" type="text" placeholder="Fri 4 Dec" autocomplete="off"></label>
+  <!-- WEBSITE ADMIN -->
+  <section id="v-web" class="adm" hidden>
+    <nav class="adm-nav" id="admNav" aria-label="Website admin"></nav>
+    <div class="adm-main">
+      <div class="adm-head"><div><h2 id="admTitle">Overview</h2><p id="admSub"></p></div><a class="btn small" id="admOpen" href="#" target="_blank" rel="noopener" hidden>Open the website</a></div>
+      <div id="admBody"></div>
     </div>
-    <label class="field"><span>Place</span><input id="wsBzPlace" type="text" autocomplete="off"></label>
-    <button class="btn primary block" id="wsSave" type="button">Save website settings</button>
-    <div class="field" style="margin-top:10px"><span>Banners on the home page</span></div>
-    <div class="list" id="bnList"></div>
-    <div class="field"><span>Add a banner</span></div>
-    <div class="row" style="align-items:center">
-      <img id="bnPrev" alt="" hidden style="flex:none;width:120px;height:64px;object-fit:cover;border-radius:10px">
-      <label class="field"><span>Picture (a wide one works best)</span><input id="bnImg" type="file" accept="image/*"></label>
-    </div>
-    <label class="tog"><input id="bnReady" type="checkbox"><span>The picture already has its own text on it</span></label>
-    <div id="bnTextFields" class="view" style="gap:14px">
-      <div class="row">
-        <label class="field"><span>Small line</span><input id="bnKicker" type="text" maxlength="40" placeholder="e.g. New in" autocomplete="off"></label>
-        <label class="field"><span>Button says</span><input id="bnLabel" type="text" maxlength="24" placeholder="Shop now" autocomplete="off"></label>
-      </div>
-      <label class="field"><span>Sentence</span><input id="bnText" type="text" maxlength="110" autocomplete="off"></label>
-    </div>
-    <label class="field"><span>Tapping it opens</span><select id="bnLink">
-      <option value="shop.html">Shop all</option><option value="necklaces.html">Necklaces</option><option value="bangles.html">Bangles</option><option value="earrings.html">Earrings</option><option value="bracelets.html">Bracelets</option><option value="stones.html">Stones</option><option value="story.html">Our story</option></select></label>
-    <button class="btn block" id="bnAdd" type="button">Add this banner</button>
-    <div class="sechead">Edit the website</div>
-    <div class="note">Open a part, change what you want, then press “Publish website changes” at the bottom. An empty box keeps the original text. Put *stars* around a word to write it in the handwritten style.</div>
-    <details class="grp"><summary>Carousel and motion</summary><div class="grp-in">
-      <div class="row">
-        <label class="field"><span>Banner change effect</span><select id="fxEffect"><option value="wipe">Wipe</option><option value="slide">Slide</option><option value="fade">Fade</option></select></label>
-        <label class="field"><span>Seconds per banner</span><input id="fxSeconds" type="number" inputmode="decimal" min="3" max="20" step="0.5"></label>
-      </div>
-      <label class="tog"><input id="fxZoom" type="checkbox"><span>Slow zoom on banner photos</span></label>
-      <label class="tog"><input id="fxReveal" type="checkbox"><span>Parts fade in while scrolling</span></label>
-      <label class="tog"><input id="fxMarquee" type="checkbox"><span>Moving line under the banner</span></label>
-      <label class="field"><span>Words in the moving line (comma between them)</span><input id="fxWords" type="text" placeholder="two souls, one design, stainless steel, handmade" autocomplete="off"></label>
-    </div></details>
-    <div id="cmsGroups" class="view" style="gap:14px"></div>
-    <details class="grp"><summary>Story page · chapters</summary><div class="grp-in" id="cmsStory"></div></details>
-    <details class="grp"><summary>Extra pages</summary><div class="grp-in" id="cmsPages"></div></details>
-    <button class="btn primary block" id="cmsSave" type="button">Publish website changes</button>
-    <div class="note">The website only gets what you switch on: the pieces marked “Show this piece on the website” with their name, price and photo, and the lines on this page. Costs, sales, table costs, bazaar history and partner shares never leave this system.</div>
+    <div class="adm-bar" id="admBar" hidden><span>You have changes that are not on the website yet.</span><button class="btn small" id="admDiscard" type="button">Discard</button><button class="btn primary small" id="admPublish" type="button">Publish to the website</button></div>
   </section>
-  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 17</div>
+  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 18</div>
 </main>
 
 <nav class="nav" id="nav" hidden><img class="nav-logo" src="logo.svg" width="3093" height="882" alt=""><div class="nav-in">
@@ -732,10 +773,6 @@ document.addEventListener('click', async e => {
   const chip = t.closest('#stockChips [data-f]'); if (chip) { stockFilter = chip.dataset.f; render(); return; }
   const s = t.closest('[data-sell]'); if (s) return openSell(s.dataset.sell);
   const ed = t.closest('[data-edit]'); if (ed) return openProd(ed.dataset.edit);
-  const bf = t.closest('[data-bnfirst]');
-  if (bf && db) { const b = banners.find(x => x.id === bf.dataset.bnfirst); if (!b) return; const body = {...b, order: Math.min(...banners.map(x => num(x.order))) - 1}; delete body.id; bf.disabled = true; await write(() => db.collection('site').doc(b.id).set(body), 'This banner now shows first'); return; }
-  const bd = t.closest('[data-bndel]');
-  if (bd && db) { if (bd.dataset.armed !== '1') { bd.dataset.armed = '1'; bd.textContent = 'Sure?'; return; } bd.disabled = true; const gone = banners.find(x => x.id === bd.dataset.bndel); if (await write(() => db.collection('site').doc(bd.dataset.bndel).delete(), 'Banner removed from the website') && gone && gone.pic) write(() => db.collection('catalogImg').doc(gone.pic).delete()); return; }
   const pl = t.closest('[data-plus]');
   if (pl && db) { const p = products.get(pl.dataset.plus); if (!p) return;
     const body = {...p, qty: num(p.qty) + 1}; pl.disabled = true;
@@ -858,156 +895,250 @@ function reconcile(){
     recBusy = false;
   }, 900);
 }
-function renderWeb(){
-  const n = [...products.values()].filter(p => p.web).length, noPic = [...products.values()].filter(p => p.web && !p.hasImg).length;
-  $('#webCount').textContent = `${n} of ${products.size} pieces are on the website.` + (noPic ? ` ${noPic} of them have no photo yet.` : '') + ' Switch a piece on from Stock → Edit, or tick several with “Select several”.';
-  $('#bnList').innerHTML = banners.length ? banners.map((b, i) => `<div class="item"><img class="thumb" ${b.img ? `src="${esc(b.img)}"` : `data-cthumb="${esc(b.pic || '')}"`} alt="">
-    <div class="info"><div class="nm">${esc(b.ready ? 'Designed banner' : (b.kicker || 'Photo banner'))}</div><div class="meta"><span>${esc(b.ready ? 'Its text is in the picture' : (b.text || ''))}</span></div></div>
-    ${i ? `<button class="btn small" type="button" data-bnfirst="${esc(b.id)}">First</button>` : '<span class="pill web">First</span>'}<button class="btn small danger" type="button" data-bndel="${esc(b.id)}">Delete</button></div>`).join('')
-    : '<div class="empty"><b>No banners of your own yet</b>The website shows its built-in banners until you add one here.</div>';
-  fillThumbs($('#bnList'));
-  if (!cmsBuilt && draftReady()) buildCms();
-  if (siteDirty || $('#v-web').contains(document.activeElement)) return;
-  $('#wsPhone').value = siteSet.whatsapp || ''; $('#wsOfferShow').checked = !!siteSet.offerShow; $('#wsOffer').value = siteSet.offerText || ''; $('#wsDisc').value = num(siteSet.discount) || '';
-  const b = siteSet.bazaar || {}; $('#wsBzShow').checked = !!b.show; $('#wsBzName').value = b.name || bazaar || ''; $('#wsBzDate').value = b.date || ''; $('#wsBzPlace').value = b.place || '';
-}
-$('#v-web').addEventListener('input', () => { siteDirty = true; });
-$('#wsSave').addEventListener('click', async () => {
-  if (!db) return;
-  const body = {whatsapp:$('#wsPhone').value.replace(/\D/g, ''), offerShow:$('#wsOfferShow').checked, offerText:$('#wsOffer').value.trim(), discount:Math.min(90, Math.max(0, num($('#wsDisc').value))),
-    bazaar:{show:$('#wsBzShow').checked, name:$('#wsBzName').value.trim(), date:$('#wsBzDate').value.trim(), place:$('#wsBzPlace').value.trim()}};
-  if (await write(() => db.doc('site/settings').set(body), 'Website settings saved')) { siteSet = body; siteDirty = false; }
-});
 $('#pWeb').addEventListener('change', e => { $('#webFields').hidden = !e.target.checked; });
-/* ---------- website editor: one public document, site/content; its pictures are catalogImg/cms-<key> ---------- */
+/* ================= WEBSITE ADMIN =================
+   One draft (adm) for site/settings + site/content, published together.
+   Pieces and banners are live documents: their switches and Save buttons write straight away. */
 const CMS = {"groups": [{"title": "Home · Banner heading", "fields": [{"k": "hero.l1", "l": "First line", "d": "Two souls,"}, {"k": "hero.l2", "l": "Second line (handwritten style)", "d": "one design."}]}, {"title": "Home · Shop by category", "hide": "cats", "fields": [{"k": "cats.kicker", "l": "Small line", "d": "Shop by category"}, {"k": "cats.title", "l": "Title", "d": "Find your *piece*"}, {"k": "cat.necklaces", "l": "Necklaces picture", "img": true}, {"k": "cat.bracelets", "l": "Bracelets picture", "img": true}, {"k": "cat.stones", "l": "Stones picture", "img": true}, {"k": "cat.bangles", "l": "Bangles picture", "img": true}, {"k": "cat.earrings", "l": "Earrings picture", "img": true}]}, {"title": "Home · Newest pieces", "hide": "feat", "fields": [{"k": "feat.kicker", "l": "Small line", "d": "New"}, {"k": "feat.title", "l": "Title", "d": "Just *landed*"}]}, {"title": "Home · Story teaser", "hide": "teaser", "fields": [{"k": "teaser.kicker", "l": "Small line", "d": "Our story"}, {"k": "teaser.title", "l": "Title", "d": "Two souls, *one design*"}, {"k": "teaser.text", "l": "Text", "area": true, "d": "em.em is two friends who became sisters, and one rule between them: a piece only gets made when both of us would wear it. It began behind a bazaar table, with labels written by hand."}, {"k": "teaser.button", "l": "Button", "d": "Read our story"}, {"k": "teaser.img", "l": "Picture", "img": true}]}, {"title": "Home · How to order", "hide": "order", "fields": [{"k": "order.kicker", "l": "Small line", "d": "How to order"}, {"k": "order.title", "l": "Title", "d": "Three taps, then we talk"}, {"k": "step1.title", "l": "Step 1 title", "d": "Pick your pieces"}, {"k": "step1.text", "l": "Step 1 text", "area": true, "d": "Tap “Add to order” on anything you love, from any page."}, {"k": "step2.title", "l": "Step 2 title", "d": "Send it on WhatsApp"}, {"k": "step2.text", "l": "Step 2 text", "area": true, "d": "Open “My order” and send the list. It arrives in our chat with the codes."}, {"k": "step3.title", "l": "Step 3 title", "d": "We confirm with you"}, {"k": "step3.text", "l": "Step 3 text", "area": true, "d": "We agree on delivery and payment with you there. Nothing is charged on the site."}]}, {"title": "Home · Bazaar card", "hide": "bazaar", "fields": [{"k": "bazaar.kicker", "l": "Small line", "d": "Next bazaar"}, {"k": "bazaar.title", "l": "Title when no bazaar is set", "d": "Come say hi at the table"}, {"k": "bazaar.text", "l": "Text when no bazaar is set", "area": true, "d": "We announce every bazaar before it happens. Follow us to know where the table will be next."}]}, {"title": "Story page · top and ending", "fields": [{"k": "story.kicker", "l": "Small line", "d": "Our story"}, {"k": "story.intro", "l": "Opening sentence", "area": true, "d": "It started with a friendship, long before it was a brand."}, {"k": "story.sign", "l": "Ending signature", "d": "with love, em.em"}]}, {"title": "Footer", "fields": [{"k": "footer.tag", "l": "Line under the logo", "area": true, "d": "Stainless steel and handmade jewelry, made by two friends who became sisters."}, {"k": "footer.thanks", "l": "Handwritten line", "d": "thank you for your order"}]}], "story": [{"title": "Before em.em", "text": "Two girls who told each other everything. Friends people mistake for sisters.", "img": ""}, {"title": "The little things", "text": "We kept sending each other pretty things at midnight. One night: why don’t we make our own?", "img": "img/aqua.jpg"}, {"title": "The name", "text": "Both our names start with the same letter. Em, a dot, and em.", "img": "img/horus-model.jpg"}, {"title": "The first table", "text": "A small bazaar table, labels written by hand, and the first stranger who smiled at the mirror.", "img": "img/table1.jpg"}, {"title": "Two souls, one design", "text": "A piece only leaves our hands when both of us love it.", "img": "img/coinpearl-hold.jpg"}, {"title": "And now, you", "text": "Wear it, and think of the one who is that friend to you.", "img": "img/table2.jpg"}]};
-let content = null, contentReady = false, draft = null, cmsBuilt = false, cmsDirty = false;
+const DEF = Object.fromEntries(CMS.groups.flatMap(g => g.fields.filter(f => 'd' in f).map(f => [f.k, f.d])));
+const SECS = {cats:'Shop by category', feat:'Newest pieces', teaser:'Story teaser', order:'How to order', bazaar:'Bazaar card'};
+const LINKS = [['shop.html','Shop all'],['necklaces.html','Necklaces'],['bangles.html','Bangles'],['earrings.html','Earrings'],['bracelets.html','Bracelets'],['stones.html','Stones'],['story.html','Our story']];
+const THEME = {sand:'#EFDDC9', teal:'#457373', deep:'#2C4A4A'};
+const ICON = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const APANELS = [
+  ['overview','Overview','Where the website stands right now.',ICON('<path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/>')],
+  ['catalog','Pieces','Choose which pieces show on the website. These switches work straight away.',ICON('<path d="M6 8h12l1 12H5L6 8z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/>')],
+  ['banners','Banners','The big pictures at the top of the home page, and how they change.',ICON('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/>')],
+  ['home','Home page','Every part of the home page: show it, hide it, move it, change its words and pictures.',ICON('<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/>')],
+  ['story','Story page','The opening line and the chapters of your story.',ICON('<path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z"/><path d="M9 9h6M9 13h6"/>')],
+  ['pages','Extra pages','Add pages of your own, like Delivery or Care guide.',ICON('<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M12 11v6M9 14h6"/>')],
+  ['shop','Shop settings','Orders, social links, offers, the next bazaar and the footer.',ICON('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.600 5.600l2.100 2.100M16.300 16.300l2.100 2.100M5.600 18.400l2.100-2.100M16.300 7.700l2.100-2.100"/>')],
+  ['look','Look and motion','Colours, the logo size, animation and the browser tab.',ICON('<path d="M12 3a9 9 0 1 0 0 18c1.500 0 2-1 2-2 0-1.500 1-2 2.500-2H18a3 3 0 0 0 3-3c0-6-4-11-9-11z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="8" r="1"/><circle cx="16" cy="11" r="1"/>')]
+];
+let content = null, contentReady = false, banners = [], adm = null, admDirty = false, admPanel = 'overview', admQ = '', admFilter = 'all', admShown = 40;
+let bnPending = null, bnLight = false, bnDraft = {ready:false, kicker:'', text:'', label:'', link:'shop.html'};
 const cmsPics = new Map();
 const cmsPic = id => { if (!cmsPics.has(id)) cmsPics.set(id, db.collection('catalogImg').doc(id).get().then(d => d.exists ? ((d.data() || {}).img || '') : '').catch(() => '')); return cmsPics.get(id); };
-const draftReady = () => !!db && contentReady;
-function fillThumbs(root){ root.querySelectorAll('img[data-cthumb]').forEach(img => { const id = img.dataset.cthumb; if (!id) return; cmsPic(id).then(u => { if (u) { img.src = u; img.hidden = false; img.removeAttribute('data-cthumb'); } }); }); }
+function fillThumbs(root){ root.querySelectorAll('img[data-cthumb]').forEach(img => { const id = img.dataset.cthumb; cmsPic(id).then(u => { if (u) { img.src = u; img.removeAttribute('data-cthumb'); } else { const s = document.createElement('span'); s.textContent = 'No picture'; img.replaceWith(s); } }); }); }
 function shrink(file, max, done){
   const url = URL.createObjectURL(file), im = new Image();
   im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
-    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
-    let q = .78, u = c.toDataURL('image/jpeg', q); while (u.length > 700000 && q > .4) { q -= .08; u = c.toDataURL('image/jpeg', q); } done(u); };
+    const g = c.getContext('2d'); g.drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+    let q = .78, u = c.toDataURL('image/jpeg', q); while (u.length > 700000 && q > .4) { q -= .08; u = c.toDataURL('image/jpeg', q); }
+    let light = false; try { const d = g.getImageData(0, 0, c.width, Math.max(1, Math.round(c.height * .16))).data; let sum = 0, n = 0; for (let i = 0; i < d.length; i += 64) { sum += d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; n++; } light = sum / n > 150; } catch (e) {}
+    done(u, light); };
   im.onerror = () => { URL.revokeObjectURL(url); toast('This picture could not be opened. Try a JPG or PNG.'); };
   im.src = url;
-}
-function loadDraft(){
-  const c = content || {}, fx = {effect:'wipe', seconds:6.5, zoom:true, reveal:true, marquee:true, words:'', ...(c.fx || {})};
-  draft = {t:{...(c.t || {})}, i:{...(c.i || {})}, hide:{...(c.hide || {})}, fx,
-    story: Array.isArray(c.story) && c.story.length ? c.story.map(x => ({...x})) : CMS.story.map((x, k) => ({id:'s' + (k + 1), title:x.title, text:x.text, img:x.img || '', pic:0})),
-    pages: Array.isArray(c.pages) ? c.pages.map(x => ({...x})) : []};
-}
-const slot = (label, key, has, attr) => `<div class="row"><img class="thumb" alt="" ${has ? `data-cthumb="cms-${esc(key)}"` : ''} hidden><label class="field"><span>${esc(label)}</span><input type="file" accept="image/*" ${attr}></label>${has ? `<button class="btn small" type="button" data-ireset="${esc(key)}" style="flex:none;align-self:flex-end">Use the original</button>` : ''}</div>`;
-function buildStory(){
-  $('#cmsStory').innerHTML = draft.story.map((c, k) => `<div class="cmsCard"><div class="row"><label class="field" style="flex:3"><span>Chapter ${k + 1} title</span><input type="text" maxlength="60" data-st="${k}" data-f="title" value="${esc(c.title || '')}"></label>
-      <button class="btn small" type="button" data-stup="${k}" style="flex:none;align-self:flex-end" ${k ? '' : 'disabled'}>Up</button><button class="btn small danger" type="button" data-stdel="${k}" style="flex:none;align-self:flex-end">Remove</button></div>
-    <label class="field"><span>Text</span><textarea rows="2" maxlength="400" data-st="${k}" data-f="text">${esc(c.text || '')}</textarea></label>
-    <div class="row"><img class="thumb" alt="" ${c.pic ? `data-cthumb="cms-story-${esc(c.id)}"` : ''} hidden><label class="field"><span>Picture${c.pic ? '' : c.img ? ' (now: the built-in one)' : ' (none yet)'}</span><input type="file" accept="image/*" data-stimg="${k}"></label></div></div>`).join('')
-    + (draft.story.length < 12 ? '<button class="btn block" type="button" id="stAdd">Add a chapter</button>' : '');
-  fillThumbs($('#cmsStory'));
-}
-function buildPages(){
-  $('#cmsPages').innerHTML = (draft.pages.length ? '' : '<div class="note">No extra pages yet. A page gets a title, a text and a picture, and its own link in the menu.</div>')
-    + draft.pages.map((p, k) => `<div class="cmsCard"><div class="row"><label class="field" style="flex:3"><span>Page title</span><input type="text" maxlength="40" data-pg="${k}" data-f="title" value="${esc(p.title || '')}"></label>
-      <button class="btn small danger" type="button" data-pgdel="${k}" style="flex:none;align-self:flex-end">Remove</button></div>
-    <label class="field"><span>Text (leave an empty line between paragraphs)</span><textarea rows="5" maxlength="4000" data-pg="${k}" data-f="text">${esc(p.text || '')}</textarea></label>
-    <div class="row"><img class="thumb" alt="" ${p.pic ? `data-cthumb="cms-page-${esc(p.slug)}"` : ''} hidden><label class="field"><span>Picture (optional)</span><input type="file" accept="image/*" data-pgimg="${k}"></label></div>
-    <label class="tog"><input type="checkbox" data-pgmenu="${k}" ${p.menu === false ? '' : 'checked'}><span>Show it in the menu</span></label></div>`).join('')
-    + (draft.pages.length < 8 ? '<button class="btn block" type="button" id="pgAdd">Add a page</button>' : '');
-  fillThumbs($('#cmsPages'));
-}
-function buildCms(){
-  if (!draft) loadDraft();
-  $('#cmsGroups').innerHTML = CMS.groups.map(g => `<details class="grp"><summary>${esc(g.title)}</summary><div class="grp-in">
-    ${g.hide ? `<label class="tog"><input type="checkbox" data-show="${esc(g.hide)}" ${draft.hide[g.hide] ? '' : 'checked'}><span>Show this part on the website</span></label>` : ''}
-    ${g.fields.map(f => f.img ? slot(f.l, f.k, !!draft.i[f.k], `data-ik="${esc(f.k)}"`)
-      : `<label class="field"><span>${esc(f.l)}</span>${f.area ? `<textarea rows="2" maxlength="600" data-k="${esc(f.k)}" placeholder="${esc(f.d)}">${esc(draft.t[f.k] || '')}</textarea>` : `<input type="text" maxlength="120" data-k="${esc(f.k)}" placeholder="${esc(f.d)}" value="${esc(draft.t[f.k] || '')}" autocomplete="off">`}</label>`).join('')}</div></details>`).join('');
-  fillThumbs($('#cmsGroups'));
-  $('#fxEffect').value = draft.fx.effect || 'wipe'; $('#fxSeconds').value = num(draft.fx.seconds) || 6.5; $('#fxZoom').checked = draft.fx.zoom !== false;
-  $('#fxReveal').checked = draft.fx.reveal !== false; $('#fxMarquee').checked = draft.fx.marquee !== false; $('#fxWords').value = draft.fx.words || '';
-  buildStory(); buildPages(); cmsBuilt = true;
 }
 const savePic = async (id, u) => { if (!await write(() => db.collection('catalogImg').doc(id).set({img:u, at:Date.now()}))) return false; cmsPics.set(id, Promise.resolve(u)); return true; };
-$('#v-web').addEventListener('input', e => {
-  const t = e.target; if (!draft) return;
-  if (t.dataset.k) { const v = t.value.trim(); if (v) draft.t[t.dataset.k] = v; else delete draft.t[t.dataset.k]; cmsDirty = true; }
-  else if (t.dataset.st != null && t.dataset.f) { draft.story[+t.dataset.st][t.dataset.f] = t.value; cmsDirty = true; }
-  else if (t.dataset.pg != null && t.dataset.f) { draft.pages[+t.dataset.pg][t.dataset.f] = t.value; cmsDirty = true; }
-  else if (t.id === 'fxSeconds') { draft.fx.seconds = Math.min(20, Math.max(3, num(t.value) || 6.5)); cmsDirty = true; }
-  else if (t.id === 'fxWords') { draft.fx.words = t.value.trim(); cmsDirty = true; }
-});
-$('#v-web').addEventListener('change', e => {
-  const t = e.target; if (!draft || !db) return;
-  if (t.dataset.show) { draft.hide[t.dataset.show] = !t.checked; cmsDirty = true; }
-  else if (t.id === 'fxEffect') { draft.fx.effect = t.value; cmsDirty = true; }
-  else if (t.id === 'fxZoom') { draft.fx.zoom = t.checked; cmsDirty = true; }
-  else if (t.id === 'fxReveal') { draft.fx.reveal = t.checked; cmsDirty = true; }
-  else if (t.id === 'fxMarquee') { draft.fx.marquee = t.checked; cmsDirty = true; }
-  else if (t.dataset.pgmenu != null) { draft.pages[+t.dataset.pgmenu].menu = t.checked; cmsDirty = true; }
-  else if (t.type === 'file' && t.files[0] && (t.dataset.ik || t.dataset.stimg != null || t.dataset.pgimg != null)) {
-    const row = t.closest('.row'), th = row && row.querySelector('.thumb');
-    shrink(t.files[0], 1400, async u => {
-      let id;
-      if (t.dataset.ik) id = 'cms-' + t.dataset.ik; else if (t.dataset.stimg != null) id = 'cms-story-' + draft.story[+t.dataset.stimg].id; else id = 'cms-page-' + draft.pages[+t.dataset.pgimg].slug;
-      if (!await savePic(id, u)) return;
-      if (t.dataset.ik) draft.i[t.dataset.ik] = Date.now(); else if (t.dataset.stimg != null) draft.story[+t.dataset.stimg].pic = Date.now(); else draft.pages[+t.dataset.pgimg].pic = Date.now();
-      if (th) { th.src = u; th.hidden = false; }
-      cmsDirty = true; toast('Picture ready. Press “Publish website changes” to show it.');
-    });
+const draftReady = () => !!db && contentReady;
+function loadAdm(){
+  const c = content || {}, s = siteSet || {}, keys = Object.keys(SECS);
+  const order = (Array.isArray(c.order) ? c.order.filter(k => keys.includes(k)) : []); for (const k of keys) if (!order.includes(k)) order.push(k);
+  adm = { set:{whatsapp:s.whatsapp || '', instagram:s.instagram || '', facebook:s.facebook || '', url:s.url || '', offerShow:!!s.offerShow, offerText:s.offerText || '', discount:num(s.discount),
+      bazaar:{show:false, name:'', date:'', place:'', ...(s.bazaar || {})}},
+    c:{t:{...(c.t || {})}, i:{...(c.i || {})}, hide:{...(c.hide || {})}, order,
+      fx:{effect:'wipe', seconds:6.5, zoom:true, reveal:true, marquee:true, words:'', ...(c.fx || {})},
+      theme:{sand:'', teal:'', deep:'', logo:0, ...(c.theme || {})}, seo:{title:'', desc:'', ...(c.seo || {})},
+      story: Array.isArray(c.story) && c.story.length ? c.story.map(x => ({...x})) : CMS.story.map((x, k) => ({id:'s' + (k + 1), title:x.title, text:x.text, img:x.img || '', pic:0})),
+      pages: Array.isArray(c.pages) ? c.pages.map(x => ({...x})) : []} };
+  admDirty = false;
+}
+const gp = path => path.split('|').reduce((o, k) => o == null ? o : o[k], adm);
+const sp = (path, v) => { const ks = path.split('|'), last = ks.pop(), o = ks.reduce((o, k) => (o[k] = o[k] == null ? {} : o[k]), adm); if (v === undefined) delete o[last]; else o[last] = v; };
+const touch = () => { admDirty = true; $('#admBar').hidden = false; };
+
+/* ---- building blocks ---- */
+const fld = (label, path, o = {}) => { const v = gp(path); return `<label class="field${o.wide ? ' wide' : ''}"><span>${esc(label)}</span>${o.area
+  ? `<textarea rows="${o.rows || 2}" maxlength="${o.max || 600}" data-b="${esc(path)}" placeholder="${esc(o.ph || '')}">${esc(v == null ? '' : v)}</textarea>`
+  : `<input type="${o.type || 'text'}" ${o.num ? 'data-num inputmode="decimal" step="any"' : `maxlength="${o.max || 140}"`} ${o.attr || ''} data-b="${esc(path)}" placeholder="${esc(o.ph || '')}" value="${esc(v == null || (o.num && !v) ? '' : v)}" autocomplete="off">`}${o.help ? `<small>${esc(o.help)}</small>` : ''}</label>`; };
+const txt = (label, key, o = {}) => fld(label, 'c|t|' + key, {...o, ph: DEF[key] || ''});
+const sw = (label, path, o = {}) => { const v = gp(path), on = o.inv ? !v : (v == null ? !!o.def : !!v); return `<label class="sw"><input type="checkbox" data-b="${esc(path)}" data-bool ${o.inv ? 'data-inv' : ''} ${on ? 'checked' : ''}><i></i><span>${esc(label)}</span></label>`; };
+const card = (title, body, o = {}) => `<div class="acard"><div class="acard-h"><div><h3>${esc(title)}</h3>${o.sub ? `<small>${esc(o.sub)}</small>` : ''}</div><div class="tools">${o.tools || ''}</div></div><div class="agrid">${body}</div></div>`;
+const islot = (label, id, flag, has, help) => `<div class="islot"><div class="iprev">${has ? `<img data-cthumb="${esc(id)}" alt="">` : '<span>No picture<br>of your own</span>'}</div><div class="imeta"><b>${esc(label)}</b>${help ? `<small>${esc(help)}</small>` : ''}
+  <div class="abtns"><label class="btn small filebtn">${has ? 'Change picture' : 'Choose picture'}<input type="file" accept="image/*" data-up="${esc(id)}" data-flag="${esc(flag)}"></label>${has ? `<button class="btn small" type="button" data-rm="${esc(flag)}">Use the original</button>` : ''}</div></div></div>`;
+const linkSel = (attr, cur) => `<select ${attr}>${LINKS.map(([h, n]) => `<option value="${h}" ${h === cur ? 'selected' : ''}>${n}</option>`).join('')}</select>`;
+
+/* ---- panels ---- */
+const PANEL = {
+  overview(){
+    const ps = [...products.values()], on = ps.filter(p => p.web), noPic = on.filter(p => !p.hasImg).length;
+    const tile = (n, l, go) => `<button class="atile" type="button" data-go="${go}"><b>${n}</b><span>${l}</span></button>`;
+    const chk = (ok, t, go, b) => `<div class="acheck ${ok ? 'ok' : ''}"><i></i><span>${t}</span>${ok ? '' : `<button class="btn small" type="button" data-go="${go}">${b}</button>`}</div>`;
+    return `<div class="atiles">${tile(on.length, 'Pieces on the website', 'catalog')}${tile(noPic, 'Shown without a photo', 'catalog')}${tile(banners.length, 'Banners of your own', 'banners')}${tile(adm.c.pages.length, 'Extra pages', 'pages')}</div>`
+      + card('Is the website ready?', chk(!!adm.set.whatsapp, 'A WhatsApp number receives the orders', 'shop', 'Add the number') + chk(on.length > 0, 'At least one piece is on the website', 'catalog', 'Choose pieces')
+        + chk(on.length > 0 && !noPic, 'Every piece on the website has a photo', 'catalog', 'Add photos') + chk(banners.length > 0, 'You added a banner of your own', 'banners', 'Add a banner'))
+      + card('Website address', fld('Link of your website', 'set|url', {ph:'https://…', wide:true, help:'Only used by the “Open the website” button on this page.'}))
+      + (content && content.at ? `<div class="note">Last published ${esc(new Date(num(content.at)).toLocaleString('en-GB', {day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'}))}.</div>` : '<div class="note">Nothing has been published from here yet. The website is showing its original texts and pictures.</div>');
+  },
+  catalogRows(){
+    const sold = soldMap(), q = admQ.trim().toLowerCase();
+    const ps = [...products.values()].map(p => ({...p, left:Math.max(0, num(p.qty) - (sold[p.code] || 0))})).sort((a, b) => a.code < b.code ? -1 : 1)
+      .filter(p => (admFilter === 'all' || (admFilter === 'on' && p.web) || (admFilter === 'off' && !p.web) || (admFilter === 'nopic' && p.web && !p.hasImg)) && (!q || p.code.toLowerCase().includes(q) || String(p.name).toLowerCase().includes(q)));
+    if (!ps.length) return `<div class="aempty">${products.size ? 'No piece matches.' : 'Add pieces in the Stock tab first.'}</div>`;
+    return ps.slice(0, admShown).map(p => `<div class="arow"><div class="athumb">${p.hasImg ? `<img data-cthumb="${esc(p.code)}" alt="">` : '<span>No photo</span>'}</div>
+      <div class="info"><div class="nm">${esc(p.name)}</div><div class="meta">${tagHtml(p.code)}<span>${esc(TYPES[p.type] ? TYPES[p.type][1] : '')}</span><span>${p.left} left</span><span>${money(p.price)} EGP</span></div></div>
+      <label class="field amini"><span>Offer price</span><input type="number" inputmode="decimal" min="0" step="any" data-offer="${esc(p.code)}" value="${num(p.offer) || ''}" placeholder="none"></label>
+      <label class="sw"><input type="checkbox" data-webon="${esc(p.code)}" ${p.web ? 'checked' : ''}><i></i><span class="sr">Show ${esc(p.code)} on the website</span></label>
+      <button class="btn small" type="button" data-edit="${esc(p.code)}">Edit</button></div>`).join('')
+      + (ps.length > admShown ? `<div class="aempty"><button class="btn small" type="button" id="admMore">Show ${Math.min(40, ps.length - admShown)} more</button></div>` : '');
+  },
+  catalog(){
+    const ps = [...products.values()], n = {all:ps.length, on:ps.filter(p => p.web).length, off:ps.filter(p => !p.web).length, nopic:ps.filter(p => p.web && !p.hasImg).length};
+    const chip = (k, l) => `<button class="chip" type="button" data-af="${k}" aria-pressed="${admFilter === k}">${l} ${n[k]}</button>`;
+    return `<div class="acard"><div class="agrid" style="grid-template-columns:1fr"><div class="atool"><input id="admQ" type="search" placeholder="Code or name" value="${esc(admQ)}" autocomplete="off">
+        <div class="chips">${chip('all', 'All')}${chip('on', 'On the website')}${chip('off', 'Hidden')}${chip('nopic', 'No photo')}</div>
+        <div class="abtns"><button class="btn small" type="button" data-bulk="show">Show every piece that has a photo</button><button class="btn small" type="button" data-bulk="hide">Hide every piece</button></div></div></div>
+      <div class="arows" id="admRows">${PANEL.catalogRows()}</div></div>
+      <div class="note">“Edit” opens the piece to add its photo, description, material and care text.</div>`;
+  },
+  banners(){
+    const fxCard = card('How the banners change', `<label class="field"><span>Effect</span><select data-b="c|fx|effect">${[['wipe', 'Wipe'], ['slide', 'Slide'], ['fade', 'Fade']].map(([v, l]) => `<option value="${v}" ${adm.c.fx.effect === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>`
+      + fld('Seconds on each banner', 'c|fx|seconds', {num:true, attr:'min="3" max="20"'}) + sw('Slow zoom on banner photos', 'c|fx|zoom', {def:true}), {sub:'Press Publish after changing these.'});
+    const list = banners.length ? banners.map((b, k) => card(b.ready ? 'Designed banner' : (b.kicker || 'Photo banner'),
+        `<div class="islot"><div class="iprev" style="width:150px;height:84px">${b.img ? `<img src="${esc(b.img)}" alt="">` : `<img data-cthumb="${esc(b.pic || '')}" alt="">`}</div><div class="imeta"><small>${b.ready ? 'The text is part of the picture.' : 'The website writes the text below over the photo.'}</small></div></div>`
+        + (b.ready ? '' : `<label class="field"><span>Small line</span><input type="text" maxlength="40" data-bn="${esc(b.id)}" data-f="kicker" value="${esc(b.kicker || '')}"></label><label class="field"><span>Button says</span><input type="text" maxlength="24" data-bn="${esc(b.id)}" data-f="label" value="${esc(b.label || '')}"></label>
+           <label class="field wide"><span>Sentence</span><input type="text" maxlength="110" data-bn="${esc(b.id)}" data-f="text" value="${esc(b.text || '')}"></label>`)
+        + `<label class="field"><span>Tapping it opens</span>${linkSel(`data-bn="${esc(b.id)}" data-f="link"`, b.link)}</label><div class="abtns" style="align-items:flex-end"><button class="btn small primary" type="button" data-bnsave="${esc(b.id)}">Save this banner</button></div>`,
+        {sub:'Banner ' + (k + 1) + ' of ' + banners.length, tools:`<button class="ibtn" type="button" data-bnmove="${esc(b.id)}" data-d="-1" aria-label="Move earlier" ${k ? '' : 'disabled'}>↑</button><button class="ibtn" type="button" data-bnmove="${esc(b.id)}" data-d="1" aria-label="Move later" ${k < banners.length - 1 ? '' : 'disabled'}>↓</button><button class="btn small danger" type="button" data-bndel="${esc(b.id)}">Delete</button>`})).join('')
+      : '<div class="note">You have no banners of your own yet, so the website shows its four built-in ones. As soon as you add one here, the website shows only yours.</div>';
+    const add = card('Add a banner', `<div class="islot"><div class="iprev" style="width:150px;height:84px">${bnPending ? `<img src="${bnPending}" alt="">` : '<span>No picture<br>chosen</span>'}</div><div class="imeta"><b>Picture</b><small>A wide picture works best, around 2400 × 1000.</small><div class="abtns"><label class="btn small filebtn">Choose picture<input type="file" accept="image/*" id="bnImg"></label></div></div></div>
+        <label class="sw"><input type="checkbox" id="bnReady" ${bnDraft.ready ? 'checked' : ''}><i></i><span>The picture already has its own text on it</span></label>`
+      + (bnDraft.ready ? '' : `<label class="field"><span>Small line</span><input type="text" maxlength="40" data-nb="kicker" value="${esc(bnDraft.kicker)}" placeholder="e.g. New in"></label><label class="field"><span>Button says</span><input type="text" maxlength="24" data-nb="label" value="${esc(bnDraft.label)}" placeholder="Shop now"></label>
+          <label class="field wide"><span>Sentence</span><input type="text" maxlength="110" data-nb="text" value="${esc(bnDraft.text)}"></label>`)
+      + `<label class="field"><span>Tapping it opens</span>${linkSel('data-nb="link"', bnDraft.link)}</label><div class="abtns" style="align-items:flex-end"><button class="btn primary small" type="button" id="bnAdd">Add this banner</button></div>`, {sub:'Banners go live as soon as you add them.'});
+    return fxCard + list + add;
+  },
+  home(){
+    const body = {
+      cats: () => txt('Small line', 'cats.kicker') + txt('Title', 'cats.title') + ['necklaces', 'bracelets', 'stones', 'bangles', 'earrings'].map(k => islot(k[0].toUpperCase() + k.slice(1) + ' tile', 'cms-cat.' + k, 'c|i|cat.' + k, !!adm.c.i['cat.' + k])).join(''),
+      feat: () => txt('Small line', 'feat.kicker') + txt('Title', 'feat.title') + '<div class="note">This row shows your four newest pieces by itself.</div>',
+      teaser: () => txt('Small line', 'teaser.kicker') + txt('Title', 'teaser.title') + txt('Text', 'teaser.text', {area:true, rows:3, wide:true}) + txt('Button', 'teaser.button') + islot('Picture', 'cms-teaser.img', 'c|i|teaser.img', !!adm.c.i['teaser.img']),
+      order: () => txt('Small line', 'order.kicker') + txt('Title', 'order.title') + [1, 2, 3].map(n => txt('Step ' + n + ' title', 'step' + n + '.title') + txt('Step ' + n + ' text', 'step' + n + '.text', {area:true})).join(''),
+      bazaar: () => txt('Small line', 'bazaar.kicker') + txt('Title when no bazaar is set', 'bazaar.title') + txt('Text when no bazaar is set', 'bazaar.text', {area:true, wide:true}) + '<div class="note">Set the next bazaar itself under Shop settings.</div>'
+    };
+    return card('Banner heading', txt('First line', 'hero.l1') + txt('Second line, handwritten', 'hero.l2'), {sub:'Shown over photo banners.'})
+      + card('Moving line under the banner', sw('Show the moving line', 'c|fx|marquee', {def:true}) + fld('Words, with a comma between them', 'c|fx|words', {wide:true, ph:'two souls, one design, stainless steel, handmade'}))
+      + adm.c.order.map((k, n) => card(SECS[k], sw('Show this part on the website', 'c|hide|' + k, {inv:true}) + body[k](),
+          {sub:'Part ' + (n + 1) + ' of ' + adm.c.order.length, tools:`<button class="ibtn" type="button" data-secmove="${k}" data-d="-1" aria-label="Move up" ${n ? '' : 'disabled'}>↑</button><button class="ibtn" type="button" data-secmove="${k}" data-d="1" aria-label="Move down" ${n < adm.c.order.length - 1 ? '' : 'disabled'}>↓</button>`})).join('')
+      + '<div class="note">An empty box keeps the original words, shown in grey. Put *stars* around a word to write it in the handwritten style.</div>';
+  },
+  story(){
+    const n = adm.c.story.length;
+    return card('Top and ending', txt('Small line', 'story.kicker') + txt('Ending signature', 'story.sign') + txt('Opening sentence', 'story.intro', {area:true, wide:true}))
+      + adm.c.story.map((c, k) => card('Chapter ' + (k + 1), fld('Title', 'c|story|' + k + '|title', {max:60, wide:true}) + fld('Text', 'c|story|' + k + '|text', {area:true, rows:3, max:400, wide:true})
+          + islot('Picture', 'cms-story-' + c.id, 'c|story|' + k + '|pic', !!c.pic, c.pic ? '' : c.img ? 'Now showing the built-in picture.' : 'No picture: the chapter shows “em . em”.'),
+          {tools:`<button class="ibtn" type="button" data-stmove="${k}" data-d="-1" aria-label="Move up" ${k ? '' : 'disabled'}>↑</button><button class="ibtn" type="button" data-stmove="${k}" data-d="1" aria-label="Move down" ${k < n - 1 ? '' : 'disabled'}>↓</button><button class="btn small danger" type="button" data-stdel="${k}">Remove</button>`})).join('')
+      + (n < 12 ? '<button class="btn block" type="button" id="stAdd">Add a chapter</button>' : '');
+  },
+  pages(){
+    return (adm.c.pages.length ? '' : '<div class="note">No extra pages yet. A page has a title, a text and one picture, and gets its own link in the menu.</div>')
+      + adm.c.pages.map((p, k) => card(p.title || 'New page', fld('Page title', 'c|pages|' + k + '|title', {max:40, wide:true}) + fld('Text. Leave an empty line between paragraphs.', 'c|pages|' + k + '|text', {area:true, rows:6, max:4000, wide:true})
+          + islot('Picture (optional)', 'cms-page-' + p.slug, 'c|pages|' + k + '|pic', !!p.pic) + sw('Show it in the menu', 'c|pages|' + k + '|menu', {def:true}),
+          {sub:'page.html?p=' + p.slug, tools:`<button class="btn small danger" type="button" data-pgdel="${k}">Remove</button>`})).join('')
+      + (adm.c.pages.length < 8 ? '<button class="btn block" type="button" id="pgAdd">Add a page</button>' : '');
+  },
+  shop(){
+    return card('Orders', fld('WhatsApp number that receives the orders', 'set|whatsapp', {type:'tel', ph:'201001234567', wide:true, help:'Country code first, digits only.'}))
+      + card('Social links', fld('Instagram username', 'set|instagram', {ph:'emem.accessories', help:'Without the @ sign.'}) + fld('Facebook page link', 'set|facebook', {ph:'https://www.facebook.com/…', max:300}), {sub:'They show as icons in the menu and the footer.'})
+      + card('Offers', sw('Show an offer line at the top of every page', 'set|offerShow') + fld('Offer line', 'set|offerText', {ph:'e.g. Free delivery this week', max:90, wide:true}) + fld('Discount on every piece (%)', 'set|discount', {num:true, attr:'min="0" max="90"', ph:'0', help:'A piece with its own offer price keeps that price.'}))
+      + card('Next bazaar', sw('Show the next bazaar on the home page', 'set|bazaar|show') + fld('Bazaar name', 'set|bazaar|name', {max:60}) + fld('Date', 'set|bazaar|date', {ph:'Fri 4 Dec', max:40}) + fld('Place', 'set|bazaar|place', {max:80, wide:true}))
+      + card('Footer', txt('Line under the logo', 'footer.tag', {area:true, wide:true}) + txt('Handwritten line', 'footer.thanks'));
+  },
+  look(){
+    const col = (l, k) => `<label class="field"><span>${l}</span><input type="color" data-b="c|theme|${k}" value="${esc(/^#[0-9a-f]{6}$/i.test(adm.c.theme[k] || '') ? adm.c.theme[k] : THEME[k])}"></label>`;
+    return card('Colours', col('Background', 'sand') + col('Main colour (buttons, titles)', 'teal') + col('Dark colour (text, footer)', 'deep') + '<div class="abtns" style="align-items:flex-end"><button class="btn small" type="button" id="themeReset">Back to the em.em colours</button></div>', {sub:'The logo keeps its own colour.'})
+      + card('Logo', `<label class="field wide"><span>Logo width in the header: <b id="logoW">${num(adm.c.theme.logo) || 132}</b> px</span><input type="range" min="90" max="190" step="2" data-b="c|theme|logo" data-num value="${num(adm.c.theme.logo) || 132}"></label>`)
+      + card('Motion', sw('Parts fade in while scrolling', 'c|fx|reveal', {def:true}) + '<div class="note">The banner effect and the moving line are under Banners and Home page.</div>')
+      + card('Browser tab and search', fld('Title of the home page', 'c|seo|title', {ph:'em.em — two souls, one design', max:70, wide:true}) + fld('Short description', 'c|seo|desc', {area:true, max:160, wide:true, ph:'Stainless steel and handmade jewelry. Two souls, one design. Order on WhatsApp.'}));
   }
+};
+function renderWeb(force){
+  if (!adm) loadAdm();
+  const nav = $('#admNav'); if (!nav.children.length) nav.innerHTML = APANELS.map(p => `<button type="button" data-a="${p[0]}">${p[3]}${p[1]}</button>`).join('');
+  nav.querySelectorAll('[data-a]').forEach(b => b.dataset.a === admPanel ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+  const P = APANELS.find(p => p[0] === admPanel); $('#admTitle').textContent = P[1]; $('#admSub').textContent = P[2];
+  const open = $('#admOpen'); open.hidden = !/^https:\/\//.test(adm.set.url || ''); if (!open.hidden) open.href = adm.set.url;
+  $('#admBar').hidden = !admDirty;
+  const body = $('#admBody'), ae = document.activeElement;
+  if (!force && body.dataset.p === admPanel && body.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && !/^(checkbox|file)$/.test(ae.type)) return;
+  body.dataset.p = admPanel; body.innerHTML = PANEL[admPanel](); fillThumbs(body);
+}
+const web = $('#v-web');
+web.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'admQ') { admQ = t.value; admShown = 40; const r = $('#admRows'); r.innerHTML = PANEL.catalogRows(); fillThumbs(r); return; }
+  if (t.dataset.nb) { bnDraft[t.dataset.nb] = t.value; return; }
+  if (!t.dataset.b || t.type === 'checkbox' || t.type === 'file') return;
+  const path = t.dataset.b; let v = 'num' in t.dataset ? num(t.value) : t.value;
+  if (path.indexOf('c|t|') === 0 && !String(v).trim()) v = undefined;
+  sp(path, v); touch();
+  if (path === 'c|theme|logo') $('#logoW').textContent = v;
 });
-$('#v-web').addEventListener('click', async e => {
-  const t = e.target; if (!draft) return;
-  const ir = t.closest('[data-ireset]'); if (ir) { delete draft.i[ir.dataset.ireset]; cmsDirty = true; const th = ir.closest('.row').querySelector('.thumb'); if (th) th.hidden = true; ir.hidden = true; return; }
-  const up = t.closest('[data-stup]'); if (up) { const k = +up.dataset.stup; if (k > 0) { [draft.story[k - 1], draft.story[k]] = [draft.story[k], draft.story[k - 1]]; cmsDirty = true; buildStory(); } return; }
-  const sd = t.closest('[data-stdel]'); if (sd) { if (draft.story.length < 2) { toast('Keep at least one chapter.'); return; } draft.story.splice(+sd.dataset.stdel, 1); cmsDirty = true; buildStory(); return; }
-  if (t.closest('#stAdd')) { draft.story.push({id:'s' + Date.now().toString(36), title:'', text:'', img:'', pic:0}); cmsDirty = true; buildStory(); return; }
-  const pd = t.closest('[data-pgdel]'); if (pd) { draft.pages.splice(+pd.dataset.pgdel, 1); cmsDirty = true; buildPages(); return; }
-  if (t.closest('#pgAdd')) { draft.pages.push({slug:'p' + Date.now().toString(36), title:'', text:'', pic:0, menu:true}); cmsDirty = true; buildPages(); return; }
-  if (t.closest('#cmsSave')) {
-    if (!db) return;
-    const body = {t:draft.t, i:draft.i, hide:draft.hide, fx:draft.fx,
-      story:draft.story.filter(c => (c.title || '').trim() || (c.text || '').trim()).map(c => ({id:String(c.id), title:String(c.title || '').trim(), text:String(c.text || '').trim(), img:String(c.img || ''), pic:num(c.pic)})),
-      pages:draft.pages.filter(p => (p.title || '').trim()).map(p => ({slug:String(p.slug), title:String(p.title).trim(), text:String(p.text || '').trim(), pic:num(p.pic), menu:p.menu !== false})), at:Date.now()};
-    const btn = $('#cmsSave'); btn.disabled = true;
-    if (await write(() => db.doc('site/content').set(body), 'Published. The website shows it on the next visit.')) { content = body; cmsDirty = false; }
+web.addEventListener('change', async e => {
+  const t = e.target; if (!db) return;
+  if (t.dataset.b && t.type === 'checkbox') { sp(t.dataset.b, 'inv' in t.dataset ? !t.checked : t.checked); touch(); return; }
+  if (t.dataset.b && t.tagName === 'SELECT') { sp(t.dataset.b, t.value); touch(); return; }
+  if (t.id === 'bnReady') { bnDraft.ready = t.checked; renderWeb(true); return; }
+  if (t.dataset.nb) { bnDraft[t.dataset.nb] = t.value; return; }
+  if (t.id === 'bnImg' && t.files[0]) { shrink(t.files[0], 1600, (u, light) => { bnPending = u; bnLight = light; renderWeb(true); }); return; }
+  if (t.dataset.up && t.files[0]) { const id = t.dataset.up, flag = t.dataset.flag; shrink(t.files[0], 1400, async u => { if (!await savePic(id, u)) return; sp(flag, Date.now()); touch(); renderWeb(true); toast('Picture ready. Press Publish to show it on the website.'); }); return; }
+  if (t.dataset.webon) { const p = products.get(t.dataset.webon); if (!p) return; const body = {...p, web:t.checked}; await write(() => db.collection('products').doc(p.code).set(body), t.checked ? `${p.code} is now on the website` : `${p.code} is hidden from the website`); return; }
+  if (t.dataset.offer) { const p = products.get(t.dataset.offer); if (!p) return; const body = {...p, offer:num(t.value)}; await write(() => db.collection('products').doc(p.code).set(body), num(t.value) ? `Offer price saved for ${p.code}` : `Offer removed from ${p.code}`); return; }
+});
+web.addEventListener('click', async e => {
+  const t = e.target, hit = s => t.closest(s);
+  let el;
+  if ((el = hit('[data-a]')) || (el = hit('[data-go]'))) { admPanel = el.dataset.a || el.dataset.go; admShown = 40; renderWeb(true); window.scrollTo(0, 0); return; }
+  if (!adm) return;
+  if ((el = hit('[data-af]'))) { admFilter = el.dataset.af; admShown = 40; renderWeb(true); return; }
+  if (hit('#admMore')) { admShown += 40; const r = $('#admRows'); r.innerHTML = PANEL.catalogRows(); fillThumbs(r); return; }
+  if ((el = hit('[data-bulk]')) && db) {
+    const on = el.dataset.bulk === 'show';
+    if (el.dataset.armed !== '1') { el.dataset.armed = '1'; el.textContent = on ? 'Tap again to show them all' : 'Tap again to hide them all'; return; }
+    el.disabled = true; let n = 0;
+    for (const p of [...products.values()]) { if (on ? (p.web || !p.hasImg) : !p.web) continue; const body = {...p, web:on}; if (!await write(() => db.collection('products').doc(p.code).set(body))) break; n++; }
+    toast(on ? `${n} pieces now show on the website` : `${n} pieces hidden from the website`); renderWeb(true); return;
+  }
+  if ((el = hit('[data-rm]'))) { const path = el.dataset.rm; sp(path, path.indexOf('c|i|') === 0 ? undefined : 0); touch(); renderWeb(true); return; }
+  if ((el = hit('[data-secmove]'))) { const o = adm.c.order, i = o.indexOf(el.dataset.secmove), j = i + Number(el.dataset.d); if (i >= 0 && j >= 0 && j < o.length) { [o[i], o[j]] = [o[j], o[i]]; touch(); renderWeb(true); } return; }
+  if ((el = hit('[data-stmove]'))) { const s = adm.c.story, i = +el.dataset.stmove, j = i + Number(el.dataset.d); if (j >= 0 && j < s.length) { [s[i], s[j]] = [s[j], s[i]]; touch(); renderWeb(true); } return; }
+  if ((el = hit('[data-stdel]'))) { if (adm.c.story.length < 2) { toast('Keep at least one chapter.'); return; } adm.c.story.splice(+el.dataset.stdel, 1); touch(); renderWeb(true); return; }
+  if (hit('#stAdd')) { adm.c.story.push({id:'s' + Date.now().toString(36), title:'', text:'', img:'', pic:0}); touch(); renderWeb(true); return; }
+  if ((el = hit('[data-pgdel]'))) { adm.c.pages.splice(+el.dataset.pgdel, 1); touch(); renderWeb(true); return; }
+  if (hit('#pgAdd')) { adm.c.pages.push({slug:'p' + Date.now().toString(36), title:'', text:'', pic:0, menu:true}); touch(); renderWeb(true); return; }
+  if (hit('#themeReset')) { adm.c.theme.sand = ''; adm.c.theme.teal = ''; adm.c.theme.deep = ''; touch(); renderWeb(true); return; }
+  if (hit('#admDiscard')) { loadAdm(); renderWeb(true); toast('Changes discarded'); return; }
+  if (!db) return;
+  /* banners: live */
+  if (hit('#bnAdd')) {
+    if (!bnPending) { toast('Choose a picture first.'); return; }
+    const now = Date.now(), picId = 'cms-bn-' + now, shot = bnPending, r = bnDraft.ready;
+    const body = {type:'banner', pic:picId, ready:r, light:bnLight, kicker:r ? '' : bnDraft.kicker.trim(), text:r ? '' : bnDraft.text.trim(), label:r ? '' : (bnDraft.label.trim() || 'Shop now'), link:bnDraft.link, order:now};
+    if (await savePic(picId, shot) && await write(() => db.collection('site').doc('banner-' + now).set(body), 'Banner added to the website')) { bnPending = null; bnDraft = {ready:false, kicker:'', text:'', label:'', link:'shop.html'}; renderWeb(true); }
+    return;
+  }
+  if ((el = hit('[data-bnsave]'))) { const b = banners.find(x => x.id === el.dataset.bnsave); if (!b) return; const body = {...b}; delete body.id;
+    web.querySelectorAll(`[data-bn="${b.id}"]`).forEach(i => { body[i.dataset.f] = i.value.trim(); }); if (!b.ready && !body.label) body.label = 'Shop now';
+    await write(() => db.collection('site').doc(b.id).set(body), 'Banner saved'); return; }
+  if ((el = hit('[data-bnmove]'))) { const i = banners.findIndex(x => x.id === el.dataset.bnmove), j = i + Number(el.dataset.d); if (i < 0 || j < 0 || j >= banners.length) return;
+    const a = banners[i], b = banners[j], oa = num(a.order), ob = num(b.order) === oa ? oa + Number(el.dataset.d) : num(b.order), A = {...a, order:ob}, B = {...b, order:oa}; delete A.id; delete B.id;
+    if (await write(() => db.collection('site').doc(a.id).set(A))) await write(() => db.collection('site').doc(b.id).set(B), 'Banner order changed'); return; }
+  if ((el = hit('[data-bndel]'))) { if (el.dataset.armed !== '1') { el.dataset.armed = '1'; el.textContent = 'Sure?'; return; } el.disabled = true; const gone = banners.find(x => x.id === el.dataset.bndel);
+    if (await write(() => db.collection('site').doc(el.dataset.bndel).delete(), 'Banner removed from the website') && gone && gone.pic) write(() => db.collection('catalogImg').doc(gone.pic).delete()); return; }
+  if (hit('#admPublish')) {
+    const s = adm.set, c = adm.c, str = v => String(v == null ? '' : v).trim();
+    const set = {whatsapp:str(s.whatsapp).replace(/\D/g, ''), instagram:str(s.instagram).replace(/^@/, ''), facebook:str(s.facebook), url:str(s.url), offerShow:!!s.offerShow, offerText:str(s.offerText), discount:Math.min(90, Math.max(0, num(s.discount))),
+      bazaar:{show:!!s.bazaar.show, name:str(s.bazaar.name), date:str(s.bazaar.date), place:str(s.bazaar.place)}};
+    const hex = v => /^#[0-9a-f]{6}$/i.test(v || '') ? v : '';
+    const body = {t:c.t, i:c.i, hide:c.hide, order:c.order, fx:{effect:c.fx.effect, seconds:Math.min(20, Math.max(3, num(c.fx.seconds) || 6.5)), zoom:c.fx.zoom !== false, reveal:c.fx.reveal !== false, marquee:c.fx.marquee !== false, words:str(c.fx.words)},
+      theme:{sand:hex(c.theme.sand), teal:hex(c.theme.teal), deep:hex(c.theme.deep), logo:num(c.theme.logo)}, seo:{title:str(c.seo.title), desc:str(c.seo.desc)},
+      story:c.story.filter(x => str(x.title) || str(x.text)).map(x => ({id:String(x.id), title:str(x.title), text:str(x.text), img:String(x.img || ''), pic:num(x.pic)})),
+      pages:c.pages.filter(p => str(p.title)).map(p => ({slug:String(p.slug), title:str(p.title), text:str(p.text), pic:num(p.pic), menu:p.menu !== false})), at:Date.now()};
+    const btn = $('#admPublish'); btn.disabled = true;
+    if (await write(() => db.doc('site/settings').set(set)) && await write(() => db.doc('site/content').set(body), 'Published. Visitors see it on their next visit.')) { siteSet = set; content = body; loadAdm(); renderWeb(true); }
     btn.disabled = false;
   }
-});
-
-/* banners: public documents site/banner-<id> */
-let banners = [], bnPending = null, bnLight = false;
-$('#bnReady').addEventListener('change', e => { $('#bnTextFields').hidden = e.target.checked; });
-$('#bnImg').addEventListener('change', e => {
-  const f = e.target.files[0]; if (!f) return;
-  const url = URL.createObjectURL(f), im = new Image();
-  im.onload = () => {
-    const k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement('canvas');
-    c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
-    const g = c.getContext('2d'); g.drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
-    let q = .78; bnPending = c.toDataURL('image/jpeg', q);
-    while (bnPending.length > 700000 && q > .4) { q -= .08; bnPending = c.toDataURL('image/jpeg', q); }
-    try { const d = g.getImageData(0, 0, c.width, Math.max(1, Math.round(c.height * .16))).data; let sum = 0, n = 0; for (let i = 0; i < d.length; i += 64) { sum += d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; n++; } bnLight = sum / n > 150; } catch (err) { bnLight = false; }
-    $('#bnPrev').src = bnPending; $('#bnPrev').hidden = false;
-  };
-  im.onerror = () => { URL.revokeObjectURL(url); toast('This picture could not be opened. Try a JPG or PNG.'); };
-  im.src = url;
-});
-$('#bnAdd').addEventListener('click', async () => {
-  if (!db) return;
-  if (!bnPending) { toast('Choose a picture first.'); return; }
-  const ready = $('#bnReady').checked, now = Date.now();
-  const shot = bnPending, picId = 'cms-bn-' + now;
-  const body = {type:'banner', pic:picId, ready, light:bnLight, kicker:ready ? '' : $('#bnKicker').value.trim(), text:ready ? '' : $('#bnText').value.trim(), label:ready ? '' : ($('#bnLabel').value.trim() || 'Shop now'), link:$('#bnLink').value, order:now};
-  const btn = $('#bnAdd'); btn.disabled = true;
-  if (await write(() => db.collection('catalogImg').doc(picId).set({img:shot, at:now})) && await write(() => db.collection('site').doc('banner-' + now).set(body), 'Banner added to the website')) {
-    cmsPics.set(picId, Promise.resolve(shot));
-    bnPending = null; $('#bnImg').value = ''; $('#bnPrev').hidden = true; $('#bnKicker').value = ''; $('#bnText').value = ''; $('#bnLabel').value = '';
-  }
-  btn.disabled = false;
 });
 $('#pImg').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
@@ -1232,9 +1363,9 @@ $('#exportBtn').addEventListener('click', async () => {
     }, () => {});
     db.doc('meta/tables').onSnapshot(snap => { tables = snap.exists ? {...(snap.data() || {})} : {}; render(); }, () => {});
     db.collection('catalog').onSnapshot(snap => { catalog = new Map(snap.docs.map(d => [d.id, d.data() || {}])); catReady = true; reconcile(); }, () => {});
-    db.doc('site/settings').onSnapshot(snap => { if (snap.exists) siteSet = Object.assign({}, siteSet, snap.data() || {}); render(); }, () => {});
+    db.doc('site/settings').onSnapshot(snap => { if (snap.exists) siteSet = Object.assign({}, siteSet, snap.data() || {}); if (!admDirty) loadAdm(); render(); }, () => {});
     db.collection('site').onSnapshot(snap => { banners = snap.docs.filter(d => d.id.indexOf('banner-') === 0).map(d => Object.assign({id:d.id}, d.data() || {})).sort((x, y) => num(x.order) - num(y.order));
-      const cd = snap.docs.find(d => d.id === 'content'); content = cd ? (cd.data() || {}) : null; contentReady = true; if (!cmsDirty) { loadDraft(); cmsBuilt = false; } render(); }, () => {});
+      const cd = snap.docs.find(d => d.id === 'content'); content = cd ? (cd.data() || {}) : null; contentReady = true; if (!admDirty) loadAdm(); render(); }, () => {});
   });
 })();
 })();
