@@ -170,7 +170,6 @@ textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba
   .toast{bottom:28px}
 }
 /* ================= website admin ================= */
-a.btn{text-decoration:none;color:inherit}
 .adm{display:flex;flex-direction:column;gap:16px}
 .adm-nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding:2px 16px}
 .adm-nav::-webkit-scrollbar{display:none}
@@ -245,13 +244,43 @@ input[type=range]{min-height:36px;padding:0;box-shadow:none;accent-color:var(--a
   .adm-nav{position:sticky;top:88px;flex-direction:column;overflow:visible;margin:0;padding:0;gap:4px}
   .adm-nav button{background:none;box-shadow:none;border-radius:12px;padding:10px 12px}
   .adm-nav button:hover{background:var(--surface)}
-  .adm-nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent-2)}
-  .agrid .islot{grid-column:auto}
   .agrid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .atiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
   .adm-bar{grid-column:2;bottom:18px}
   #admBody{max-width:880px}
 }
+/* page builder */
+.blkc.off{opacity:.55}
+.bh{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer}
+.bh .btx{flex:1;min-width:0}
+.bh h3{margin:0;font-family:var(--display);font-size:15px;font-weight:500}
+.bh small{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bh .tools{display:flex;gap:5px;flex:none}
+.bico{flex:none;display:block;width:58px;height:40px;border-radius:8px;background:var(--bg);overflow:hidden}
+.bico svg{width:100%;height:100%}
+.bico.big{width:100%;height:auto;aspect-ratio:64/44}
+.blkc.open{box-shadow:0 0 0 2px var(--accent),var(--lift)}
+.btabs{display:flex;gap:4px;margin:0 14px;padding:4px;border-radius:12px;background:var(--bg)}
+.btabs button{flex:1;min-height:36px;border:0;border-radius:9px;background:none;font-weight:500;font-size:13.5px;color:var(--muted)}
+.btabs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(31,51,51,.12)}
+.lib{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:14px 18px 18px}
+.libitem{display:flex;flex-direction:column;gap:6px;padding:10px;border:0;border-radius:14px;background:var(--bg);text-align:left;transition:box-shadow .15s,transform .15s}
+.libitem:hover{box-shadow:0 0 0 2px var(--accent);transform:translateY(-1px)}
+.libitem b{font-weight:500;font-size:14px}
+.libitem small{font-size:12px;color:var(--muted);line-height:1.35}
+.alist{display:flex;flex-direction:column;gap:10px}
+.lih{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lih b{font-weight:500;font-size:13.5px}
+.pv{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;background:#152424}
+.pv-bar{display:flex;align-items:center;gap:12px;padding:10px 14px;color:#fff}
+.pv-bar b{font-family:var(--display);font-weight:500;margin-right:auto}
+.pv-bar .seg{background:rgba(255,255,255,.12)}
+.pv-bar .seg button{color:rgba(255,255,255,.75);min-height:34px;padding:6px 14px}
+.pv-bar .seg button[aria-pressed="true"]{background:#fff;color:var(--ink)}
+.pv-bar .btn{box-shadow:none;background:rgba(255,255,255,.14);color:#fff}
+.pv-stage{flex:1;display:flex;justify-content:center;padding:0 12px 12px;min-height:0}
+#pvFrame{width:100%;max-width:100%;height:100%;border:0;border-radius:14px;background:#fff}
+@media (min-width:900px){ .lib{grid-template-columns:repeat(4,minmax(0,1fr))} }
 </style>
 
 <div class="deco" aria-hidden="true"><i></i><i></i></div>
@@ -397,7 +426,11 @@ input[type=range]{min-height:36px;padding:0;box-shadow:none;accent-color:var(--a
     </div>
     <div class="adm-bar" id="admBar" hidden><span>You have changes that are not on the website yet.</span><button class="btn small" id="admDiscard" type="button">Discard</button><button class="btn primary small" id="admPublish" type="button">Publish to the website</button></div>
   </section>
-  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 18</div>
+  <div class="pv" id="pv" hidden>
+    <div class="pv-bar"><b>Preview, not published yet</b><div class="seg"><button type="button" data-pvw="100%" aria-pressed="true">Laptop</button><button type="button" data-pvw="400px" aria-pressed="false">Phone</button></div><button class="btn small" type="button" id="pvClose">Close</button></div>
+    <div class="pv-stage"><iframe id="pvFrame" title="Website preview"></iframe></div>
+  </div>
+  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 19</div>
 </main>
 
 <nav class="nav" id="nav" hidden><img class="nav-logo" src="logo.svg" width="3093" height="882" alt=""><div class="nav-in">
@@ -899,23 +932,56 @@ $('#pWeb').addEventListener('change', e => { $('#webFields').hidden = !e.target.
 /* ================= WEBSITE ADMIN =================
    One draft (adm) for site/settings + site/content, published together.
    Pieces and banners are live documents: their switches and Save buttons write straight away. */
-const CMS = {"groups": [{"title": "Home · Banner heading", "fields": [{"k": "hero.l1", "l": "First line", "d": "Two souls,"}, {"k": "hero.l2", "l": "Second line (handwritten style)", "d": "one design."}]}, {"title": "Home · Shop by category", "hide": "cats", "fields": [{"k": "cats.kicker", "l": "Small line", "d": "Shop by category"}, {"k": "cats.title", "l": "Title", "d": "Find your *piece*"}, {"k": "cat.necklaces", "l": "Necklaces picture", "img": true}, {"k": "cat.bracelets", "l": "Bracelets picture", "img": true}, {"k": "cat.stones", "l": "Stones picture", "img": true}, {"k": "cat.bangles", "l": "Bangles picture", "img": true}, {"k": "cat.earrings", "l": "Earrings picture", "img": true}]}, {"title": "Home · Newest pieces", "hide": "feat", "fields": [{"k": "feat.kicker", "l": "Small line", "d": "New"}, {"k": "feat.title", "l": "Title", "d": "Just *landed*"}]}, {"title": "Home · Story teaser", "hide": "teaser", "fields": [{"k": "teaser.kicker", "l": "Small line", "d": "Our story"}, {"k": "teaser.title", "l": "Title", "d": "Two souls, *one design*"}, {"k": "teaser.text", "l": "Text", "area": true, "d": "em.em is two friends who became sisters, and one rule between them: a piece only gets made when both of us would wear it. It began behind a bazaar table, with labels written by hand."}, {"k": "teaser.button", "l": "Button", "d": "Read our story"}, {"k": "teaser.img", "l": "Picture", "img": true}]}, {"title": "Home · How to order", "hide": "order", "fields": [{"k": "order.kicker", "l": "Small line", "d": "How to order"}, {"k": "order.title", "l": "Title", "d": "Three taps, then we talk"}, {"k": "step1.title", "l": "Step 1 title", "d": "Pick your pieces"}, {"k": "step1.text", "l": "Step 1 text", "area": true, "d": "Tap “Add to order” on anything you love, from any page."}, {"k": "step2.title", "l": "Step 2 title", "d": "Send it on WhatsApp"}, {"k": "step2.text", "l": "Step 2 text", "area": true, "d": "Open “My order” and send the list. It arrives in our chat with the codes."}, {"k": "step3.title", "l": "Step 3 title", "d": "We confirm with you"}, {"k": "step3.text", "l": "Step 3 text", "area": true, "d": "We agree on delivery and payment with you there. Nothing is charged on the site."}]}, {"title": "Home · Bazaar card", "hide": "bazaar", "fields": [{"k": "bazaar.kicker", "l": "Small line", "d": "Next bazaar"}, {"k": "bazaar.title", "l": "Title when no bazaar is set", "d": "Come say hi at the table"}, {"k": "bazaar.text", "l": "Text when no bazaar is set", "area": true, "d": "We announce every bazaar before it happens. Follow us to know where the table will be next."}]}, {"title": "Story page · top and ending", "fields": [{"k": "story.kicker", "l": "Small line", "d": "Our story"}, {"k": "story.intro", "l": "Opening sentence", "area": true, "d": "It started with a friendship, long before it was a brand."}, {"k": "story.sign", "l": "Ending signature", "d": "with love, em.em"}]}, {"title": "Footer", "fields": [{"k": "footer.tag", "l": "Line under the logo", "area": true, "d": "Stainless steel and handmade jewelry, made by two friends who became sisters."}, {"k": "footer.thanks", "l": "Handwritten line", "d": "thank you for your order"}]}], "story": [{"title": "Before em.em", "text": "Two girls who told each other everything. Friends people mistake for sisters.", "img": ""}, {"title": "The little things", "text": "We kept sending each other pretty things at midnight. One night: why don’t we make our own?", "img": "img/aqua.jpg"}, {"title": "The name", "text": "Both our names start with the same letter. Em, a dot, and em.", "img": "img/horus-model.jpg"}, {"title": "The first table", "text": "A small bazaar table, labels written by hand, and the first stranger who smiled at the mirror.", "img": "img/table1.jpg"}, {"title": "Two souls, one design", "text": "A piece only leaves our hands when both of us love it.", "img": "img/coinpearl-hold.jpg"}, {"title": "And now, you", "text": "Wear it, and think of the one who is that friend to you.", "img": "img/table2.jpg"}]};
+const CMS = {"groups": [{"title": "Story page · top and ending", "fields": [{"k": "story.kicker", "l": "Small line", "d": "Our story"}, {"k": "story.intro", "l": "Opening sentence", "area": true, "d": "It started with a friendship, long before it was a brand."}, {"k": "story.sign", "l": "Ending signature", "d": "with love, em.em"}]}, {"title": "Footer", "fields": [{"k": "footer.tag", "l": "Line under the logo", "area": true, "d": "Stainless steel and handmade jewelry, made by two friends who became sisters."}, {"k": "footer.thanks", "l": "Handwritten line", "d": "thank you for your order"}]}], "story": [{"title": "Before em.em", "text": "Two girls who told each other everything. Friends people mistake for sisters.", "img": ""}, {"title": "The little things", "text": "We kept sending each other pretty things at midnight. One night: why don’t we make our own?", "img": "img/aqua.jpg"}, {"title": "The name", "text": "Both our names start with the same letter. Em, a dot, and em.", "img": "img/horus-model.jpg"}, {"title": "The first table", "text": "A small bazaar table, labels written by hand, and the first stranger who smiled at the mirror.", "img": "img/table1.jpg"}, {"title": "Two souls, one design", "text": "A piece only leaves our hands when both of us love it.", "img": "img/coinpearl-hold.jpg"}, {"title": "And now, you", "text": "Wear it, and think of the one who is that friend to you.", "img": "img/table2.jpg"}], "home": [{"id": "h1", "type": "banner", "props": {"l1": "Two souls,", "l2": "one design"}, "style": {}}, {"id": "h2", "type": "marquee", "props": {"words": "two souls, one design, stainless steel, handmade, made to be worn"}, "style": {}}, {"id": "h3", "type": "cats", "props": {"kicker": "Shop by category", "title": "Find your *piece*"}, "style": {}}, {"id": "h4", "type": "products", "props": {"kicker": "New", "title": "Just *landed*", "source": "new", "count": "4"}, "style": {}}, {"id": "h5", "type": "imgtext", "props": {"side": "left", "kicker": "Our story", "title": "_Two souls, one design_", "text": "em.em is two friends who became sisters, and one rule between them: a piece only gets made when both of us would wear it. It began behind a bazaar table, with labels written by hand.", "btn": "Read our story", "link": "story.html", "img": "img/table1.jpg"}, "style": {}}, {"id": "h6", "type": "steps", "props": {"kicker": "How to order", "title": "Three taps, then we talk", "items": [{"title": "Pick your pieces", "text": "Tap “Add to order” on anything you love, from any page."}, {"title": "Send it on WhatsApp", "text": "Open “My order” and send the list. It arrives in our chat with the codes."}, {"title": "We confirm with you", "text": "We agree on delivery and payment with you there. Nothing is charged on the site."}]}, "style": {}}, {"id": "h7", "type": "bazaar", "props": {"kicker": "Next bazaar", "title": "Come say hi at the table", "text": "We announce every bazaar before it happens. Follow us to know where the table will be next."}, "style": {}}]};
 const DEF = Object.fromEntries(CMS.groups.flatMap(g => g.fields.filter(f => 'd' in f).map(f => [f.k, f.d])));
 const SECS = {cats:'Shop by category', feat:'Newest pieces', teaser:'Story teaser', order:'How to order', bazaar:'Bazaar card'};
 const LINKS = [['shop.html','Shop all'],['necklaces.html','Necklaces'],['bangles.html','Bangles'],['earrings.html','Earrings'],['bracelets.html','Bracelets'],['stones.html','Stones'],['story.html','Our story']];
-const THEME = {sand:'#EFDDC9', teal:'#457373', deep:'#2C4A4A'};
+const THEME = {sand:'#EFDDC9', teal:'#457373', deep:'#2C4A4A', night:'#1E3636'};
+const CATK = ['necklaces','bracelets','stones','bangles','earrings'];
+/* the layout library: [name, what it is, fields] ; a field is [key, label, options] */
+const F_HEAD = [['kicker','Small line'],['title','Title']];
+const BT = {
+  banner:['Banner carousel','Your banners, changing by themselves',[['l1','Heading, first line'],['l2','Heading, handwritten line']]],
+  hero:['Big title','A large title over a picture or a colour',[['layout','Layout',{choice:[['center','Centred'],['left','On the left'],['split','Picture beside the text']]}],...F_HEAD,['text','Text',{area:1,wide:1}],['btn','Button text'],['link','Button opens',{link:1}],['pic','Picture',{img:1}]]],
+  text:['Text','A title and paragraphs',[...F_HEAD,['text','Text. Leave an empty line between paragraphs.',{area:1,rows:6,wide:1,max:4000}]]],
+  imgtext:['Picture and text','A picture beside a text',[['side','Picture on the',{choice:[['left','Left'],['right','Right']]}],...F_HEAD,['text','Text',{area:1,rows:4,wide:1,max:1500}],['btn','Button text'],['link','Button opens',{link:1}],['pic','Picture',{img:1}]]],
+  products:['Pieces','A row of pieces straight from your stock',[...F_HEAD,['source','Which pieces',{choice:[['new','Newest'],['offers','On offer'],['necklaces','Necklaces'],['bangles','Bangles'],['earrings','Earrings'],['bracelets','Bracelets'],['stones','Stones']]}],['count','How many',{choice:[['4','4'],['8','8'],['12','12']]}]]],
+  cats:['Category tiles','The five shop categories as pictures',[...F_HEAD,...CATK.map(k => [k, k[0].toUpperCase() + k.slice(1) + ' picture', {img:1}])]],
+  steps:['Columns','Two to four short columns',[...F_HEAD,['items','Column',{list:[['title','Title'],['text','Text',{area:1}]],max:4}]]],
+  gallery:['Gallery','Up to six pictures in a grid',[...F_HEAD,...[1,2,3,4,5,6].map(n => ['g' + n, 'Picture ' + n, {img:1}])]],
+  quote:['Quote','One line in the handwritten style',[['text','The line',{wide:1}],['by','Small line under it']]],
+  cta:['Call to action','A coloured card with a button',[...F_HEAD,['text','Text',{area:1,wide:1}],['btn','Button text'],['link','Button opens',{link:1}]]],
+  faq:['Questions','Questions that open and close',[...F_HEAD,['items','Question',{list:[['title','Question'],['text','Answer',{area:1,rows:3}]],max:10}]]],
+  bazaar:['Next bazaar','Shows the next bazaar by itself',[...F_HEAD,['text','Text when no bazaar is set',{area:1,wide:1}]]],
+  marquee:['Moving line','Words that slide across the page',[['words','Words, with a comma between them',{wide:1}]]],
+  spacer:['Space','Empty space between two parts',[['size','Height',{choice:[['s','Small'],['m','Medium'],['l','Large']]}]]]
+};
+const NEWBLK = {banner:{l1:'Two souls,',l2:'one design.'}, hero:{layout:'center',kicker:'',title:'A new *title*',text:'',btn:'Shop all',link:'shop.html'}, text:{title:'A title',text:'Write here.'},
+  imgtext:{side:'left',title:'A title',text:'Write here.',btn:'',link:'shop.html'}, products:{kicker:'',title:'Our *pieces*',source:'new',count:'4'}, cats:{kicker:'Shop by category',title:'Find your *piece*'},
+  steps:{title:'',items:[{title:'First',text:''},{title:'Second',text:''},{title:'Third',text:''}]}, gallery:{title:''}, quote:{text:'two souls, one design',by:''}, cta:{title:'A title',text:'',btn:'Shop all',link:'shop.html'},
+  faq:{title:'Questions',items:[{title:'How do I order?',text:'Add the pieces to your order and send it on WhatsApp.'}]}, bazaar:{kicker:'Next bazaar',title:'Come say hi at the table',text:'Follow us to know where the table will be next.'}, marquee:{words:'two souls, one design'}, spacer:{size:'m'}};
+const TH = (()=>{ const A = '#457373', L = '#cfdedb', r = (x,y,w,h,f,o) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="${f}"${o ? ` opacity="${o}"` : ''}/>`;
+  const m = {banner:r(2,2,60,40,A)+r(8,14,26,4,'#fff')+r(8,22,18,3,'#fff',.7)+r(8,30,12,5,'#fff'), hero:r(2,2,60,40,L)+r(18,13,28,5,A)+r(22,22,20,3,A,.6)+r(26,29,12,5,A),
+    text:r(8,6,30,5,A)+r(8,16,48,3,L)+r(8,22,48,3,L)+r(8,28,40,3,L)+r(8,34,44,3,L), imgtext:r(4,6,26,32,L)+r(34,10,24,5,A)+r(34,19,26,3,L)+r(34,25,22,3,L)+r(34,32,12,5,A),
+    products:[0,1,2,3].map(i=>r(3+i*15,8,13,20,L)+r(3+i*15,31,9,3,A)).join(''), cats:[0,1,2,3,4].map(i=>`<path d="M${3+i*12} 36V18a5 5 0 0 1 10 0v18z" fill="${i<3?A:L}"/>`).join(''),
+    steps:[0,1,2].map(i=>r(3+i*20,8,18,28,L)+r(6+i*20,14,10,3,A)+r(6+i*20,21,12,2,A,.5)).join(''), gallery:[0,1,2].map(i=>r(3+i*20,4,18,17,L)+r(3+i*20,23,18,17,L)).join(''),
+    quote:`<path d="M14 26c6-10 12 6 18-4s10 6 18-2" fill="none" stroke="${A}" stroke-width="2.500" stroke-linecap="round"/>`+r(24,34,16,2,L), cta:r(4,10,56,24,A)+r(10,17,22,4,'#fff')+r(10,25,16,3,'#fff',.7)+r(42,18,14,8,'#fff'),
+    faq:[0,1,2].map(i=>r(6,7+i*11,52,8,L)+r(50,10+i*11,5,2,A)).join(''), bazaar:r(4,10,56,24,A)+r(10,16,14,3,'#fff',.7)+r(10,22,26,4,'#fff')+r(10,29,12,3,'#fff',.7),
+    marquee:r(0,17,64,10,A)+[0,1,2,3].map(i=>r(4+i*16,21,10,2,'#fff')).join(''), spacer:`<path d="M32 8v28M26 14l6-6 6 6M26 30l6 6 6-6" fill="none" stroke="${A}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`};
+  return t => `<svg viewBox="0 0 64 44" aria-hidden="true">${m[t] || ''}</svg>`; })();
+const FONT_BODY = ['Lexend Deca','Poppins','Montserrat','Jost','Nunito Sans','Playfair Display','Cormorant Garamond'], FONT_SCRIPT = ['Sacramento','Dancing Script','Great Vibes','Parisienne'];
 const ICON = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const APANELS = [
   ['overview','Overview','Where the website stands right now.',ICON('<path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/>')],
   ['catalog','Pieces','Choose which pieces show on the website. These switches work straight away.',ICON('<path d="M6 8h12l1 12H5L6 8z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/>')],
   ['banners','Banners','The big pictures at the top of the home page, and how they change.',ICON('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/>')],
-  ['home','Home page','Every part of the home page: show it, hide it, move it, change its words and pictures.',ICON('<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/>')],
+  ['pages','Pages','Build every page from blocks: pick a layout, fill it in, style it, then preview.',ICON('<path d="M4 5h16v5H4zM4 14h7v5H4zM15 14h5v5h-5z"/>')],
   ['story','Story page','The opening line and the chapters of your story.',ICON('<path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z"/><path d="M9 9h6M9 13h6"/>')],
-  ['pages','Extra pages','Add pages of your own, like Delivery or Care guide.',ICON('<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M12 11v6M9 14h6"/>')],
   ['shop','Shop settings','Orders, social links, offers, the next bazaar and the footer.',ICON('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.600 5.600l2.100 2.100M16.300 16.300l2.100 2.100M5.600 18.400l2.100-2.100M16.300 7.700l2.100-2.100"/>')],
-  ['look','Look and motion','Colours, the logo size, animation and the browser tab.',ICON('<path d="M12 3a9 9 0 1 0 0 18c1.500 0 2-1 2-2 0-1.500 1-2 2.500-2H18a3 3 0 0 0 3-3c0-6-4-11-9-11z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="8" r="1"/><circle cx="16" cy="11" r="1"/>')]
+  ['theme','Theme','Colours, fonts, shapes, the logo and motion for the whole website.',ICON('<path d="M12 3a9 9 0 1 0 0 18c1.500 0 2-1 2-2 0-1.500 1-2 2.500-2H18a3 3 0 0 0 3-3c0-6-4-11-9-11z"/><circle cx="8" cy="11" r="1"/><circle cx="12" cy="8" r="1"/><circle cx="16" cy="11" r="1"/>')]
 ];
 let content = null, contentReady = false, banners = [], adm = null, admDirty = false, admPanel = 'overview', admQ = '', admFilter = 'all', admShown = 40;
+let admPage = 'home', admBlk = '', admTab = 'content', admLib = false, pvOpen = false, pvT = 0;
 let bnPending = null, bnLight = false, bnDraft = {ready:false, kicker:'', text:'', label:'', link:'shop.html'};
 const cmsPics = new Map();
 const cmsPic = id => { if (!cmsPics.has(id)) cmsPics.set(id, db.collection('catalogImg').doc(id).get().then(d => d.exists ? ((d.data() || {}).img || '') : '').catch(() => '')); return cmsPics.get(id); };
@@ -932,21 +998,38 @@ function shrink(file, max, done){
 }
 const savePic = async (id, u) => { if (!await write(() => db.collection('catalogImg').doc(id).set({img:u, at:Date.now()}))) return false; cmsPics.set(id, Promise.resolve(u)); return true; };
 const draftReady = () => !!db && contentReady;
+const copy = v => JSON.parse(JSON.stringify(v));
 function loadAdm(){
-  const c = content || {}, s = siteSet || {}, keys = Object.keys(SECS);
-  const order = (Array.isArray(c.order) ? c.order.filter(k => keys.includes(k)) : []); for (const k of keys) if (!order.includes(k)) order.push(k);
+  const c = content || {}, s = siteSet || {};
+  let pv = Array.isArray(c.pv) ? copy(c.pv) : [];
+  if (!pv.some(p => p.slug === 'home')) pv.unshift({slug:'home', title:'Home', blocks:copy(CMS.home || [])});
+  if (!Array.isArray(c.pv) && Array.isArray(c.pages)) for (const p of c.pages) pv.push({slug:p.slug, title:p.title, menu:p.menu !== false, blocks:[{id:'b' + p.slug, type:'text', props:{title:p.title, text:p.text || ''}, style:{}}]});
+  pv = pv.map(p => ({slug:String(p.slug), title:p.title || '', menu:p.menu !== false, theme:{sand:'', teal:'', deep:'', ...(p.theme || {})}, blocks:(p.blocks || []).filter(b => b && BT[b.type]).map(b => ({id:String(b.id), type:b.type, off:!!b.off, props:b.props || {}, style:b.style || {}}))}));
   adm = { set:{whatsapp:s.whatsapp || '', instagram:s.instagram || '', facebook:s.facebook || '', url:s.url || '', offerShow:!!s.offerShow, offerText:s.offerText || '', discount:num(s.discount),
       bazaar:{show:false, name:'', date:'', place:'', ...(s.bazaar || {})}},
-    c:{t:{...(c.t || {})}, i:{...(c.i || {})}, hide:{...(c.hide || {})}, order,
-      fx:{effect:'wipe', seconds:6.5, zoom:true, reveal:true, marquee:true, words:'', ...(c.fx || {})},
-      theme:{sand:'', teal:'', deep:'', logo:0, ...(c.theme || {})}, seo:{title:'', desc:'', ...(c.seo || {})},
-      story: Array.isArray(c.story) && c.story.length ? c.story.map(x => ({...x})) : CMS.story.map((x, k) => ({id:'s' + (k + 1), title:x.title, text:x.text, img:x.img || '', pic:0})),
-      pages: Array.isArray(c.pages) ? c.pages.map(x => ({...x})) : []} };
+    c:{t:{...(c.t || {})}, pv,
+      fx:{effect:'wipe', seconds:6.5, zoom:true, reveal:true, ...(c.fx || {})},
+      theme:{sand:'', teal:'', deep:'', night:'', logo:0, font:'Lexend Deca', script:'Sacramento', buttons:'pill', corners:18, ...(c.theme || {})}, seo:{title:'', desc:'', ...(c.seo || {})},
+      story: Array.isArray(c.story) && c.story.length ? c.story.map(x => ({...x})) : CMS.story.map((x, k) => ({id:'s' + (k + 1), title:x.title, text:x.text, img:x.img || '', pic:0}))} };
+  if (!adm.c.pv.some(p => p.slug === admPage)) admPage = 'home';
   admDirty = false;
+}
+function buildContent(){
+  const c = adm.c, str = v => String(v == null ? '' : v).trim(), hex = v => /^#[0-9a-f]{6}$/i.test(v || '') ? v : '';
+  return {t:c.t, fx:{effect:c.fx.effect, seconds:Math.min(20, Math.max(3, num(c.fx.seconds) || 6.5)), zoom:c.fx.zoom !== false, reveal:c.fx.reveal !== false},
+    theme:{sand:hex(c.theme.sand), teal:hex(c.theme.teal), deep:hex(c.theme.deep), night:hex(c.theme.night), logo:num(c.theme.logo), font:str(c.theme.font), script:str(c.theme.script), buttons:str(c.theme.buttons), corners:num(c.theme.corners)},
+    seo:{title:str(c.seo.title), desc:str(c.seo.desc)},
+    story:c.story.filter(x => str(x.title) || str(x.text)).map(x => ({id:String(x.id), title:str(x.title), text:str(x.text), img:String(x.img || ''), pic:num(x.pic)})),
+    pv:c.pv.filter(p => p.slug === 'home' || str(p.title)).map(p => ({slug:p.slug, title:str(p.title) || 'Home', menu:p.menu !== false, theme:{sand:hex(p.theme.sand), teal:hex(p.theme.teal), deep:hex(p.theme.deep)}, blocks:copy(p.blocks)})), at:Date.now()};
+}
+function buildSettings(){
+  const s = adm.set, str = v => String(v == null ? '' : v).trim();
+  return {whatsapp:str(s.whatsapp).replace(/\D/g, ''), instagram:str(s.instagram).replace(/^@/, ''), facebook:str(s.facebook), url:str(s.url), offerShow:!!s.offerShow, offerText:str(s.offerText), discount:Math.min(90, Math.max(0, num(s.discount))),
+    bazaar:{show:!!s.bazaar.show, name:str(s.bazaar.name), date:str(s.bazaar.date), place:str(s.bazaar.place)}};
 }
 const gp = path => path.split('|').reduce((o, k) => o == null ? o : o[k], adm);
 const sp = (path, v) => { const ks = path.split('|'), last = ks.pop(), o = ks.reduce((o, k) => (o[k] = o[k] == null ? {} : o[k]), adm); if (v === undefined) delete o[last]; else o[last] = v; };
-const touch = () => { admDirty = true; $('#admBar').hidden = false; };
+const touch = () => { admDirty = true; $('#admBar').hidden = false; if (pvOpen) { clearTimeout(pvT); pvT = setTimeout(pvSend, 350); } };
 
 /* ---- building blocks ---- */
 const fld = (label, path, o = {}) => { const v = gp(path); return `<label class="field${o.wide ? ' wide' : ''}"><span>${esc(label)}</span>${o.area
@@ -955,8 +1038,8 @@ const fld = (label, path, o = {}) => { const v = gp(path); return `<label class=
 const txt = (label, key, o = {}) => fld(label, 'c|t|' + key, {...o, ph: DEF[key] || ''});
 const sw = (label, path, o = {}) => { const v = gp(path), on = o.inv ? !v : (v == null ? !!o.def : !!v); return `<label class="sw"><input type="checkbox" data-b="${esc(path)}" data-bool ${o.inv ? 'data-inv' : ''} ${on ? 'checked' : ''}><i></i><span>${esc(label)}</span></label>`; };
 const card = (title, body, o = {}) => `<div class="acard"><div class="acard-h"><div><h3>${esc(title)}</h3>${o.sub ? `<small>${esc(o.sub)}</small>` : ''}</div><div class="tools">${o.tools || ''}</div></div><div class="agrid">${body}</div></div>`;
-const islot = (label, id, flag, has, help) => `<div class="islot"><div class="iprev">${has ? `<img data-cthumb="${esc(id)}" alt="">` : '<span>No picture<br>of your own</span>'}</div><div class="imeta"><b>${esc(label)}</b>${help ? `<small>${esc(help)}</small>` : ''}
-  <div class="abtns"><label class="btn small filebtn">${has ? 'Change picture' : 'Choose picture'}<input type="file" accept="image/*" data-up="${esc(id)}" data-flag="${esc(flag)}"></label>${has ? `<button class="btn small" type="button" data-rm="${esc(flag)}">Use the original</button>` : ''}</div></div></div>`;
+const islot = (label, id, flag, has, help, rm) => `<div class="islot"><div class="iprev">${has ? `<img data-cthumb="${esc(id)}" alt="">` : '<span>No picture<br>of your own</span>'}</div><div class="imeta"><b>${esc(label)}</b>${help ? `<small>${esc(help)}</small>` : ''}
+  <div class="abtns"><label class="btn small filebtn">${has ? 'Change picture' : 'Choose picture'}<input type="file" accept="image/*" data-up="${esc(id)}" data-flag="${esc(flag)}"></label>${has ? `<button class="btn small" type="button" data-rm="${esc(flag)}">${rm || 'Use the original'}</button>` : ''}</div></div></div>`;
 const linkSel = (attr, cur) => `<select ${attr}>${LINKS.map(([h, n]) => `<option value="${h}" ${h === cur ? 'selected' : ''}>${n}</option>`).join('')}</select>`;
 
 /* ---- panels ---- */
@@ -965,7 +1048,7 @@ const PANEL = {
     const ps = [...products.values()], on = ps.filter(p => p.web), noPic = on.filter(p => !p.hasImg).length;
     const tile = (n, l, go) => `<button class="atile" type="button" data-go="${go}"><b>${n}</b><span>${l}</span></button>`;
     const chk = (ok, t, go, b) => `<div class="acheck ${ok ? 'ok' : ''}"><i></i><span>${t}</span>${ok ? '' : `<button class="btn small" type="button" data-go="${go}">${b}</button>`}</div>`;
-    return `<div class="atiles">${tile(on.length, 'Pieces on the website', 'catalog')}${tile(noPic, 'Shown without a photo', 'catalog')}${tile(banners.length, 'Banners of your own', 'banners')}${tile(adm.c.pages.length, 'Extra pages', 'pages')}</div>`
+    return `<div class="atiles">${tile(on.length, 'Pieces on the website', 'catalog')}${tile(noPic, 'Shown without a photo', 'catalog')}${tile(banners.length, 'Banners of your own', 'banners')}${tile(adm.c.pv.length, 'Pages', 'pages')}</div>`
       + card('Is the website ready?', chk(!!adm.set.whatsapp, 'A WhatsApp number receives the orders', 'shop', 'Add the number') + chk(on.length > 0, 'At least one piece is on the website', 'catalog', 'Choose pieces')
         + chk(on.length > 0 && !noPic, 'Every piece on the website has a photo', 'catalog', 'Add photos') + chk(banners.length > 0, 'You added a banner of your own', 'banners', 'Add a banner'))
       + card('Website address', fld('Link of your website', 'set|url', {ph:'https://…', wide:true, help:'Only used by the “Open the website” button on this page.'}))
@@ -1009,19 +1092,35 @@ const PANEL = {
       + `<label class="field"><span>Tapping it opens</span>${linkSel('data-nb="link"', bnDraft.link)}</label><div class="abtns" style="align-items:flex-end"><button class="btn primary small" type="button" id="bnAdd">Add this banner</button></div>`, {sub:'Banners go live as soon as you add them.'});
     return fxCard + list + add;
   },
-  home(){
-    const body = {
-      cats: () => txt('Small line', 'cats.kicker') + txt('Title', 'cats.title') + ['necklaces', 'bracelets', 'stones', 'bangles', 'earrings'].map(k => islot(k[0].toUpperCase() + k.slice(1) + ' tile', 'cms-cat.' + k, 'c|i|cat.' + k, !!adm.c.i['cat.' + k])).join(''),
-      feat: () => txt('Small line', 'feat.kicker') + txt('Title', 'feat.title') + '<div class="note">This row shows your four newest pieces by itself.</div>',
-      teaser: () => txt('Small line', 'teaser.kicker') + txt('Title', 'teaser.title') + txt('Text', 'teaser.text', {area:true, rows:3, wide:true}) + txt('Button', 'teaser.button') + islot('Picture', 'cms-teaser.img', 'c|i|teaser.img', !!adm.c.i['teaser.img']),
-      order: () => txt('Small line', 'order.kicker') + txt('Title', 'order.title') + [1, 2, 3].map(n => txt('Step ' + n + ' title', 'step' + n + '.title') + txt('Step ' + n + ' text', 'step' + n + '.text', {area:true})).join(''),
-      bazaar: () => txt('Small line', 'bazaar.kicker') + txt('Title when no bazaar is set', 'bazaar.title') + txt('Text when no bazaar is set', 'bazaar.text', {area:true, wide:true}) + '<div class="note">Set the next bazaar itself under Shop settings.</div>'
-    };
-    return card('Banner heading', txt('First line', 'hero.l1') + txt('Second line, handwritten', 'hero.l2'), {sub:'Shown over photo banners.'})
-      + card('Moving line under the banner', sw('Show the moving line', 'c|fx|marquee', {def:true}) + fld('Words, with a comma between them', 'c|fx|words', {wide:true, ph:'two souls, one design, stainless steel, handmade'}))
-      + adm.c.order.map((k, n) => card(SECS[k], sw('Show this part on the website', 'c|hide|' + k, {inv:true}) + body[k](),
-          {sub:'Part ' + (n + 1) + ' of ' + adm.c.order.length, tools:`<button class="ibtn" type="button" data-secmove="${k}" data-d="-1" aria-label="Move up" ${n ? '' : 'disabled'}>↑</button><button class="ibtn" type="button" data-secmove="${k}" data-d="1" aria-label="Move down" ${n < adm.c.order.length - 1 ? '' : 'disabled'}>↓</button>`})).join('')
-      + '<div class="note">An empty box keeps the original words, shown in grey. Put *stars* around a word to write it in the handwritten style.</div>';
+  pages(){
+    const pv = adm.c.pv, pi = Math.max(0, pv.findIndex(p => p.slug === admPage)), pg = pv[pi], base = 'c|pv|' + pi;
+    const links = [['index.html','Home'], ...LINKS, ...pv.filter(p => p.slug !== 'home').map(p => ['page.html?p=' + p.slug, p.title || 'New page'])];
+    const sel = (label, path, opts, cur) => `<label class="field"><span>${label}</span><select data-b="${path}" data-re>${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(cur) === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`;
+    const colr = (label, path, cur, def) => `<label class="field"><span>${label}</span><input type="color" data-b="${path}" value="${/^#[0-9a-f]{6}$/i.test(cur || '') ? cur : def}"></label>`;
+    const field = (bp, b, [k, label, o = {}]) => { const path = bp + '|props|' + k;
+      if (o.img) return islot(label, 'cms-b-' + b.id + (k === 'pic' ? '' : '-' + k), path, !!b.props[k], '', 'Remove picture');
+      if (o.choice) return sel(label, path, o.choice, b.props[k] == null ? o.choice[0][0] : b.props[k]);
+      if (o.link) return sel(label, path, links, b.props[k] || 'shop.html');
+      if (o.list) { const its = Array.isArray(b.props[k]) ? b.props[k] : []; return `<div class="wide alist">${its.map((it, n) => `<div class="cmsCard"><div class="lih"><b>${label} ${n + 1}</b><button class="btn small danger" type="button" data-lidel="${path}|${n}">Remove</button></div>${o.list.map(([kk, ll, oo = {}]) => fld(ll, path + '|' + n + '|' + kk, {...oo, wide:true})).join('')}</div>`).join('')}${its.length < o.max ? `<button class="btn small" type="button" data-liadd="${path}">Add a ${label.toLowerCase()}</button>` : ''}</div>`; }
+      return fld(label, path, o); };
+    const tabs = `<div class="chips">${pv.map(p => `<button class="chip" type="button" data-pgsel="${esc(p.slug)}" aria-pressed="${p.slug === pg.slug}">${esc(p.slug === 'home' ? 'Home' : (p.title || 'New page'))}</button>`).join('')}${pv.length < 9 ? '<button class="chip" type="button" id="pvAdd">+ New page</button>' : ''}</div>`;
+    const settings = card(pg.slug === 'home' ? 'Home page' : 'This page', (pg.slug === 'home' ? '' : fld('Page title', base + '|title', {max:40}) + sw('Show it in the menu', base + '|menu', {def:true}))
+        + colr('Page background', base + '|theme|sand', pg.theme.sand, adm.c.theme.sand || THEME.sand) + colr('Page main colour', base + '|theme|teal', pg.theme.teal, adm.c.theme.teal || THEME.teal) + colr('Page dark colour', base + '|theme|deep', pg.theme.deep, adm.c.theme.deep || THEME.deep)
+        + `<div class="abtns" style="align-items:flex-end"><button class="btn small" type="button" data-pgtheme="${pi}">Use the site colours</button></div>`,
+        {sub:pg.slug === 'home' ? 'Colours here apply to this page only.' : 'page.html?p=' + pg.slug, tools:`<button class="btn small primary" type="button" id="pvShow">Preview</button>${pg.slug === 'home' ? '' : `<button class="btn small danger" type="button" data-pvdel="${pi}">Delete page</button>`}`});
+    const blocks = pg.blocks.map((b, bi) => { const bp = base + '|blocks|' + bi, T = BT[b.type], open = admBlk === b.id, s = b.style || {}, sum = b.props.title || b.props.text || b.props.words || b.props.l1 || '';
+      const head = `<div class="bh" data-bopen="${esc(b.id)}"><span class="bico">${TH(b.type)}</span><div class="btx"><h3>${T[0]}</h3><small>${esc(String(sum).replace(/\*/g, '').slice(0, 60)) || T[1]}</small></div>
+        <div class="tools"><button class="ibtn" type="button" data-bmove="${bi}" data-d="-1" aria-label="Move up" ${bi ? '' : 'disabled'}>↑</button><button class="ibtn" type="button" data-bmove="${bi}" data-d="1" aria-label="Move down" ${bi < pg.blocks.length - 1 ? '' : 'disabled'}>↓</button><button class="ibtn" type="button" data-bdup="${bi}" aria-label="Duplicate" title="Duplicate">⧉</button><button class="ibtn" type="button" data-bdel="${bi}" aria-label="Delete" title="Delete">✕</button></div></div>`;
+      const body = !open ? '' : `<div class="btabs"><button type="button" data-btab="content" aria-pressed="${admTab === 'content'}">Content</button><button type="button" data-btab="style" aria-pressed="${admTab === 'style'}">Style</button></div><div class="agrid">`
+        + (admTab === 'content' ? T[2].map(f => field(bp, b, f)).join('') + sw('Hide this block for now', bp + '|off')
+          : sel('Background', bp + '|style|bg', [['', 'None'], ['sand', 'Site background'], ['cream', 'Cream'], ['paper', 'White'], ['teal', 'Main colour'], ['dark', 'Dark'], ['custom', 'My own colour']], s.bg || '') + (s.bg === 'custom' ? colr('Background colour', bp + '|style|bgc', s.bgc, '#F6E8DA') : '')
+          + sel('Text colour', bp + '|style|fg', [['', 'Automatic'], ['custom', 'My own colour']], s.fg || '') + (s.fg === 'custom' ? colr('Text colour', bp + '|style|fgc', s.fgc, '#2C4A4A') : '')
+          + sel('Space above and below', bp + '|style|pad', [['s', 'Small'], ['m', 'Medium'], ['l', 'Large']], s.pad || 'm') + sel('Alignment', bp + '|style|align', [['left', 'Left'], ['center', 'Centred']], s.align || 'left')) + '</div>';
+      return `<div class="acard blkc${b.off ? ' off' : ''}${open ? ' open' : ''}">${head}${body}</div>`; }).join('');
+    const lib = admLib ? `<div class="acard"><div class="acard-h"><div><h3>Choose a layout</h3><small>It is added at the end of the page. Move it with the arrows.</small></div><div class="tools"><button class="btn small" type="button" id="libClose">Close</button></div></div><div class="lib">${Object.keys(BT).map(t => `<button class="libitem" type="button" data-newblk="${t}"><span class="bico big">${TH(t)}</span><b>${BT[t][0]}</b><small>${BT[t][1]}</small></button>`).join('')}</div></div>`
+      : '<button class="btn primary block" type="button" id="libOpen">Add a block</button>';
+    return tabs + settings + (pg.blocks.length ? '' : '<div class="note">This page is empty. Add a first block below.</div>') + blocks + lib
+      + '<div class="note">Put *stars* around a word to write it in the handwritten style, and _underscores_ around words to write them like the logo slogan, in spaced capitals. Press Preview to see the page before you publish.</div>';
   },
   story(){
     const n = adm.c.story.length;
@@ -1031,13 +1130,6 @@ const PANEL = {
           {tools:`<button class="ibtn" type="button" data-stmove="${k}" data-d="-1" aria-label="Move up" ${k ? '' : 'disabled'}>↑</button><button class="ibtn" type="button" data-stmove="${k}" data-d="1" aria-label="Move down" ${k < n - 1 ? '' : 'disabled'}>↓</button><button class="btn small danger" type="button" data-stdel="${k}">Remove</button>`})).join('')
       + (n < 12 ? '<button class="btn block" type="button" id="stAdd">Add a chapter</button>' : '');
   },
-  pages(){
-    return (adm.c.pages.length ? '' : '<div class="note">No extra pages yet. A page has a title, a text and one picture, and gets its own link in the menu.</div>')
-      + adm.c.pages.map((p, k) => card(p.title || 'New page', fld('Page title', 'c|pages|' + k + '|title', {max:40, wide:true}) + fld('Text. Leave an empty line between paragraphs.', 'c|pages|' + k + '|text', {area:true, rows:6, max:4000, wide:true})
-          + islot('Picture (optional)', 'cms-page-' + p.slug, 'c|pages|' + k + '|pic', !!p.pic) + sw('Show it in the menu', 'c|pages|' + k + '|menu', {def:true}),
-          {sub:'page.html?p=' + p.slug, tools:`<button class="btn small danger" type="button" data-pgdel="${k}">Remove</button>`})).join('')
-      + (adm.c.pages.length < 8 ? '<button class="btn block" type="button" id="pgAdd">Add a page</button>' : '');
-  },
   shop(){
     return card('Orders', fld('WhatsApp number that receives the orders', 'set|whatsapp', {type:'tel', ph:'201001234567', wide:true, help:'Country code first, digits only.'}))
       + card('Social links', fld('Instagram username', 'set|instagram', {ph:'emem.accessories', help:'Without the @ sign.'}) + fld('Facebook page link', 'set|facebook', {ph:'https://www.facebook.com/…', max:300}), {sub:'They show as icons in the menu and the footer.'})
@@ -1045,11 +1137,14 @@ const PANEL = {
       + card('Next bazaar', sw('Show the next bazaar on the home page', 'set|bazaar|show') + fld('Bazaar name', 'set|bazaar|name', {max:60}) + fld('Date', 'set|bazaar|date', {ph:'Fri 4 Dec', max:40}) + fld('Place', 'set|bazaar|place', {max:80, wide:true}))
       + card('Footer', txt('Line under the logo', 'footer.tag', {area:true, wide:true}) + txt('Handwritten line', 'footer.thanks'));
   },
-  look(){
-    const col = (l, k) => `<label class="field"><span>${l}</span><input type="color" data-b="c|theme|${k}" value="${esc(/^#[0-9a-f]{6}$/i.test(adm.c.theme[k] || '') ? adm.c.theme[k] : THEME[k])}"></label>`;
-    return card('Colours', col('Background', 'sand') + col('Main colour (buttons, titles)', 'teal') + col('Dark colour (text, footer)', 'deep') + '<div class="abtns" style="align-items:flex-end"><button class="btn small" type="button" id="themeReset">Back to the em.em colours</button></div>', {sub:'The logo keeps its own colour.'})
-      + card('Logo', `<label class="field wide"><span>Logo width in the header: <b id="logoW">${num(adm.c.theme.logo) || 132}</b> px</span><input type="range" min="90" max="190" step="2" data-b="c|theme|logo" data-num value="${num(adm.c.theme.logo) || 132}"></label>`)
-      + card('Motion', sw('Parts fade in while scrolling', 'c|fx|reveal', {def:true}) + '<div class="note">The banner effect and the moving line are under Banners and Home page.</div>')
+  theme(){
+    const t = adm.c.theme, col = (l, k) => `<label class="field"><span>${l}</span><input type="color" data-b="c|theme|${k}" value="${esc(/^#[0-9a-f]{6}$/i.test(t[k] || '') ? t[k] : THEME[k])}"></label>`;
+    const sel = (l, k, opts) => `<label class="field"><span>${l}</span><select data-b="c|theme|${k}">${opts.map(o => { const [v, n] = Array.isArray(o) ? o : [o, o]; return `<option value="${esc(v)}" ${String(t[k]) === v ? 'selected' : ''}>${esc(n)}</option>`; }).join('')}</select></label>`;
+    return card('Colours', col('Background', 'sand') + col('Main colour (buttons, titles)', 'teal') + col('Text colour', 'deep') + col('Footer and dark parts', 'night') + '<div class="abtns" style="align-items:flex-end"><button class="btn small" type="button" id="themeReset">Back to the em.em colours</button></div>', {sub:'For the whole website. A page can have its own colours under Pages.', tools:'<button class="btn small primary" type="button" id="pvShow">Preview</button>'})
+      + card('Fonts', sel('Text font', 'font', FONT_BODY) + sel('Handwritten font', 'script', FONT_SCRIPT), {sub:'The logo keeps its own lettering.'})
+      + card('Shapes', sel('Buttons', 'buttons', [['pill', 'Fully round'], ['round', 'Soft corners'], ['square', 'Square']]) + `<label class="field"><span>Corners of cards and pictures: <b id="cornW">${num(t.corners)}</b> px</span><input type="range" min="0" max="28" step="2" data-b="c|theme|corners" data-num value="${num(t.corners)}"></label>`)
+      + card('Logo', `<label class="field wide"><span>Logo width in the header: <b id="logoW">${num(t.logo) || 132}</b> px</span><input type="range" min="90" max="190" step="2" data-b="c|theme|logo" data-num value="${num(t.logo) || 132}"></label>`)
+      + card('Motion', sw('Parts fade in while scrolling', 'c|fx|reveal', {def:true}) + sw('Slow zoom on banner photos', 'c|fx|zoom', {def:true}))
       + card('Browser tab and search', fld('Title of the home page', 'c|seo|title', {ph:'em.em — two souls, one design', max:70, wide:true}) + fld('Short description', 'c|seo|desc', {area:true, max:160, wide:true, ph:'Stainless steel and handmade jewelry. Two souls, one design. Order on WhatsApp.'}));
   }
 };
@@ -1074,11 +1169,12 @@ web.addEventListener('input', e => {
   if (path.indexOf('c|t|') === 0 && !String(v).trim()) v = undefined;
   sp(path, v); touch();
   if (path === 'c|theme|logo') $('#logoW').textContent = v;
+  if (path === 'c|theme|corners') $('#cornW').textContent = v;
 });
 web.addEventListener('change', async e => {
   const t = e.target; if (!db) return;
   if (t.dataset.b && t.type === 'checkbox') { sp(t.dataset.b, 'inv' in t.dataset ? !t.checked : t.checked); touch(); return; }
-  if (t.dataset.b && t.tagName === 'SELECT') { sp(t.dataset.b, t.value); touch(); return; }
+  if (t.dataset.b && t.tagName === 'SELECT') { sp(t.dataset.b, t.value); touch(); if ('re' in t.dataset) renderWeb(true); return; }
   if (t.id === 'bnReady') { bnDraft.ready = t.checked; renderWeb(true); return; }
   if (t.dataset.nb) { bnDraft[t.dataset.nb] = t.value; return; }
   if (t.id === 'bnImg' && t.files[0]) { shrink(t.files[0], 1600, (u, light) => { bnPending = u; bnLight = light; renderWeb(true); }); return; }
@@ -1100,14 +1196,28 @@ web.addEventListener('click', async e => {
     for (const p of [...products.values()]) { if (on ? (p.web || !p.hasImg) : !p.web) continue; const body = {...p, web:on}; if (!await write(() => db.collection('products').doc(p.code).set(body))) break; n++; }
     toast(on ? `${n} pieces now show on the website` : `${n} pieces hidden from the website`); renderWeb(true); return;
   }
-  if ((el = hit('[data-rm]'))) { const path = el.dataset.rm; sp(path, path.indexOf('c|i|') === 0 ? undefined : 0); touch(); renderWeb(true); return; }
-  if ((el = hit('[data-secmove]'))) { const o = adm.c.order, i = o.indexOf(el.dataset.secmove), j = i + Number(el.dataset.d); if (i >= 0 && j >= 0 && j < o.length) { [o[i], o[j]] = [o[j], o[i]]; touch(); renderWeb(true); } return; }
+  if ((el = hit('[data-rm]'))) { sp(el.dataset.rm, 0); touch(); renderWeb(true); return; }
+  /* page builder */
+  const PG = () => adm.c.pv.find(p => p.slug === admPage) || adm.c.pv[0];
+  if ((el = hit('[data-pgsel]'))) { admPage = el.dataset.pgsel; admBlk = ''; admLib = false; renderWeb(true); return; }
+  if (hit('#pvAdd')) { const slug = 'p' + Date.now().toString(36); adm.c.pv.push({slug, title:'New page', menu:true, theme:{sand:'', teal:'', deep:''}, blocks:[{id:'b' + Date.now().toString(36), type:'text', off:false, props:copy(NEWBLK.text), style:{}}]}); admPage = slug; admBlk = ''; touch(); renderWeb(true); return; }
+  if ((el = hit('[data-pvdel]'))) { if (el.dataset.armed !== '1') { el.dataset.armed = '1'; el.textContent = 'Sure?'; return; } adm.c.pv.splice(+el.dataset.pvdel, 1); admPage = 'home'; touch(); renderWeb(true); return; }
+  if ((el = hit('[data-pgtheme]'))) { const p = adm.c.pv[+el.dataset.pgtheme]; p.theme = {sand:'', teal:'', deep:''}; touch(); renderWeb(true); return; }
+  if (hit('#pvShow')) { pvShow(); return; }
+  if (hit('#libOpen')) { admLib = true; renderWeb(true); return; }
+  if (hit('#libClose')) { admLib = false; renderWeb(true); return; }
+  if ((el = hit('[data-newblk]'))) { const id = 'b' + Date.now().toString(36); PG().blocks.push({id, type:el.dataset.newblk, off:false, props:copy(NEWBLK[el.dataset.newblk] || {}), style:{}}); admBlk = id; admTab = 'content'; admLib = false; touch(); renderWeb(true); return; }
+  if ((el = hit('[data-bmove]'))) { const bs = PG().blocks, i = +el.dataset.bmove, j = i + Number(el.dataset.d); if (j >= 0 && j < bs.length) { [bs[i], bs[j]] = [bs[j], bs[i]]; touch(); renderWeb(true); } return; }
+  if ((el = hit('[data-bdup]'))) { const bs = PG().blocks, i = +el.dataset.bdup, nb = copy(bs[i]); nb.id = 'b' + Date.now().toString(36); for (const k in nb.props) if (BT[nb.type][2].some(f => f[0] === k && f[2] && f[2].img)) delete nb.props[k]; bs.splice(i + 1, 0, nb); admBlk = nb.id; touch(); renderWeb(true); return; }
+  if ((el = hit('[data-bdel]'))) { if (el.dataset.armed !== '1') { el.dataset.armed = '1'; el.textContent = '?'; el.style.color = 'var(--bad)'; return; } PG().blocks.splice(+el.dataset.bdel, 1); admBlk = ''; touch(); renderWeb(true); return; }
+  if ((el = hit('[data-btab]'))) { admTab = el.dataset.btab; renderWeb(true); return; }
+  if ((el = hit('[data-liadd]'))) { const a = gp(el.dataset.liadd); if (Array.isArray(a)) a.push({title:'', text:''}); else sp(el.dataset.liadd, [{title:'', text:''}]); touch(); renderWeb(true); return; }
+  if ((el = hit('[data-lidel]'))) { const ks = el.dataset.lidel.split('|'), n = +ks.pop(), a = gp(ks.join('|')); if (Array.isArray(a)) a.splice(n, 1); touch(); renderWeb(true); return; }
+  if ((el = hit('[data-bopen]')) && !hit('.tools')) { admBlk = admBlk === el.dataset.bopen ? '' : el.dataset.bopen; admTab = 'content'; renderWeb(true); return; }
   if ((el = hit('[data-stmove]'))) { const s = adm.c.story, i = +el.dataset.stmove, j = i + Number(el.dataset.d); if (j >= 0 && j < s.length) { [s[i], s[j]] = [s[j], s[i]]; touch(); renderWeb(true); } return; }
   if ((el = hit('[data-stdel]'))) { if (adm.c.story.length < 2) { toast('Keep at least one chapter.'); return; } adm.c.story.splice(+el.dataset.stdel, 1); touch(); renderWeb(true); return; }
   if (hit('#stAdd')) { adm.c.story.push({id:'s' + Date.now().toString(36), title:'', text:'', img:'', pic:0}); touch(); renderWeb(true); return; }
-  if ((el = hit('[data-pgdel]'))) { adm.c.pages.splice(+el.dataset.pgdel, 1); touch(); renderWeb(true); return; }
-  if (hit('#pgAdd')) { adm.c.pages.push({slug:'p' + Date.now().toString(36), title:'', text:'', pic:0, menu:true}); touch(); renderWeb(true); return; }
-  if (hit('#themeReset')) { adm.c.theme.sand = ''; adm.c.theme.teal = ''; adm.c.theme.deep = ''; touch(); renderWeb(true); return; }
+  if (hit('#themeReset')) { Object.assign(adm.c.theme, {sand:'', teal:'', deep:'', night:''}); touch(); renderWeb(true); return; }
   if (hit('#admDiscard')) { loadAdm(); renderWeb(true); toast('Changes discarded'); return; }
   if (!db) return;
   /* banners: live */
@@ -1127,19 +1237,26 @@ web.addEventListener('click', async e => {
   if ((el = hit('[data-bndel]'))) { if (el.dataset.armed !== '1') { el.dataset.armed = '1'; el.textContent = 'Sure?'; return; } el.disabled = true; const gone = banners.find(x => x.id === el.dataset.bndel);
     if (await write(() => db.collection('site').doc(el.dataset.bndel).delete(), 'Banner removed from the website') && gone && gone.pic) write(() => db.collection('catalogImg').doc(gone.pic).delete()); return; }
   if (hit('#admPublish')) {
-    const s = adm.set, c = adm.c, str = v => String(v == null ? '' : v).trim();
-    const set = {whatsapp:str(s.whatsapp).replace(/\D/g, ''), instagram:str(s.instagram).replace(/^@/, ''), facebook:str(s.facebook), url:str(s.url), offerShow:!!s.offerShow, offerText:str(s.offerText), discount:Math.min(90, Math.max(0, num(s.discount))),
-      bazaar:{show:!!s.bazaar.show, name:str(s.bazaar.name), date:str(s.bazaar.date), place:str(s.bazaar.place)}};
-    const hex = v => /^#[0-9a-f]{6}$/i.test(v || '') ? v : '';
-    const body = {t:c.t, i:c.i, hide:c.hide, order:c.order, fx:{effect:c.fx.effect, seconds:Math.min(20, Math.max(3, num(c.fx.seconds) || 6.5)), zoom:c.fx.zoom !== false, reveal:c.fx.reveal !== false, marquee:c.fx.marquee !== false, words:str(c.fx.words)},
-      theme:{sand:hex(c.theme.sand), teal:hex(c.theme.teal), deep:hex(c.theme.deep), logo:num(c.theme.logo)}, seo:{title:str(c.seo.title), desc:str(c.seo.desc)},
-      story:c.story.filter(x => str(x.title) || str(x.text)).map(x => ({id:String(x.id), title:str(x.title), text:str(x.text), img:String(x.img || ''), pic:num(x.pic)})),
-      pages:c.pages.filter(p => str(p.title)).map(p => ({slug:String(p.slug), title:str(p.title), text:str(p.text), pic:num(p.pic), menu:p.menu !== false})), at:Date.now()};
+    const set = buildSettings(), body = buildContent();
     const btn = $('#admPublish'); btn.disabled = true;
     if (await write(() => db.doc('site/settings').set(set)) && await write(() => db.doc('site/content').set(body), 'Published. Visitors see it on their next visit.')) { siteSet = set; content = body; loadAdm(); renderWeb(true); }
     btn.disabled = false;
   }
 });
+/* live preview: the real website in a frame, fed with the unpublished draft */
+function pvSend(){ const f = $('#pvFrame'); if (!pvOpen || !f.contentWindow) return;
+  Promise.all(banners.map(b => b.img ? Promise.resolve(b.img) : cmsPic(b.pic || ''))).then(imgs => { const bl = banners.map((b, k) => ({img:imgs[k], ready:!!b.ready, light:!!b.light, kicker:b.kicker || '', text:b.text || '', label:b.label || 'Shop now', link:b.link || 'shop.html'})).filter(x => x.img);
+    try { f.contentWindow.postMessage({type:'emem-preview', content:buildContent(), settings:buildSettings(), banners:bl}, '*'); } catch (e) {} }); }
+function pvShow(){
+  const url = String(adm.set.url || '').trim();
+  if (!/^https:\/\//.test(url)) { toast('First write the link of your website under Overview.'); admPanel = 'overview'; renderWeb(true); return; }
+  const page = admPanel === 'pages' && admPage !== 'home' ? 'page.html?p=' + admPage + '&preview=1' : 'index.html?preview=1';
+  $('#pvFrame').src = url.replace(/\/?(index\.html)?$/, '/') + page; pvOpen = true; $('#pv').hidden = false; document.body.style.overflow = 'hidden';
+}
+addEventListener('message', e => { if (e.data && e.data.type === 'emem-preview-ready' && pvOpen) pvSend(); });
+$('#pv').addEventListener('click', e => { const t = e.target;
+  if (t.closest('#pvClose')) { pvOpen = false; $('#pv').hidden = true; $('#pvFrame').src = 'about:blank'; document.body.style.overflow = ''; return; }
+  const w = t.closest('[data-pvw]'); if (w) { $('#pvFrame').style.maxWidth = w.dataset.pvw; $('#pv').querySelectorAll('[data-pvw]').forEach(b => b.setAttribute('aria-pressed', b === w)); } });
 $('#pImg').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   const url = URL.createObjectURL(f), im = new Image();
