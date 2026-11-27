@@ -310,9 +310,27 @@ textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba
     </div>
     <label class="field"><span>Place</span><input id="wsBzPlace" type="text" autocomplete="off"></label>
     <button class="btn primary block" id="wsSave" type="button">Save website settings</button>
+    <div class="field" style="margin-top:10px"><span>Banners on the home page</span></div>
+    <div class="list" id="bnList"></div>
+    <div class="field"><span>Add a banner</span></div>
+    <div class="row" style="align-items:center">
+      <img id="bnPrev" alt="" hidden style="flex:none;width:120px;height:64px;object-fit:cover;border-radius:10px">
+      <label class="field"><span>Picture (a wide one works best)</span><input id="bnImg" type="file" accept="image/*"></label>
+    </div>
+    <label class="tog"><input id="bnReady" type="checkbox"><span>The picture already has its own text on it</span></label>
+    <div id="bnTextFields" class="view" style="gap:14px">
+      <div class="row">
+        <label class="field"><span>Small line</span><input id="bnKicker" type="text" maxlength="40" placeholder="e.g. New in" autocomplete="off"></label>
+        <label class="field"><span>Button says</span><input id="bnLabel" type="text" maxlength="24" placeholder="Shop now" autocomplete="off"></label>
+      </div>
+      <label class="field"><span>Sentence</span><input id="bnText" type="text" maxlength="110" autocomplete="off"></label>
+    </div>
+    <label class="field"><span>Tapping it opens</span><select id="bnLink">
+      <option value="shop.html">Shop all</option><option value="necklaces.html">Necklaces</option><option value="bangles.html">Bangles</option><option value="earrings.html">Earrings</option><option value="bracelets.html">Bracelets</option><option value="stones.html">Stones</option><option value="story.html">Our story</option></select></label>
+    <button class="btn block" id="bnAdd" type="button">Add this banner</button>
     <div class="note">The website only gets what you switch on: the pieces marked “Show this piece on the website” with their name, price and photo, and the lines on this page. Costs, sales, table costs, bazaar history and partner shares never leave this system.</div>
   </section>
-  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 14</div>
+  <div id="ver" style="text-align:center;font-size:11px;letter-spacing:.14em;color:var(--muted)">VERSION 15</div>
 </main>
 
 <nav class="nav" id="nav" hidden><img class="nav-logo" src="logo.png" width="640" height="177" alt=""><div class="nav-in">
@@ -688,6 +706,10 @@ document.addEventListener('click', async e => {
   const chip = t.closest('#stockChips [data-f]'); if (chip) { stockFilter = chip.dataset.f; render(); return; }
   const s = t.closest('[data-sell]'); if (s) return openSell(s.dataset.sell);
   const ed = t.closest('[data-edit]'); if (ed) return openProd(ed.dataset.edit);
+  const bf = t.closest('[data-bnfirst]');
+  if (bf && db) { const b = banners.find(x => x.id === bf.dataset.bnfirst); if (!b) return; const body = {...b, order: Math.min(...banners.map(x => num(x.order))) - 1}; delete body.id; bf.disabled = true; await write(() => db.collection('site').doc(b.id).set(body), 'This banner now shows first'); return; }
+  const bd = t.closest('[data-bndel]');
+  if (bd && db) { if (bd.dataset.armed !== '1') { bd.dataset.armed = '1'; bd.textContent = 'Sure?'; return; } bd.disabled = true; await write(() => db.collection('site').doc(bd.dataset.bndel).delete(), 'Banner removed from the website'); return; }
   const pl = t.closest('[data-plus]');
   if (pl && db) { const p = products.get(pl.dataset.plus); if (!p) return;
     const body = {...p, qty: num(p.qty) + 1}; pl.disabled = true;
@@ -813,6 +835,10 @@ function reconcile(){
 function renderWeb(){
   const n = [...products.values()].filter(p => p.web).length, noPic = [...products.values()].filter(p => p.web && !p.hasImg).length;
   $('#webCount').textContent = `${n} of ${products.size} pieces are on the website.` + (noPic ? ` ${noPic} of them have no photo yet.` : '') + ' Switch a piece on from Stock → Edit, or tick several with “Select several”.';
+  $('#bnList').innerHTML = banners.length ? banners.map((b, i) => `<div class="item"><img src="${esc(b.img)}" alt="" style="flex:none;width:92px;height:52px;object-fit:cover;border-radius:10px">
+    <div class="info"><div class="nm">${esc(b.ready ? 'Designed banner' : (b.kicker || 'Photo banner'))}</div><div class="meta"><span>${esc(b.ready ? 'Its text is in the picture' : (b.text || ''))}</span></div></div>
+    ${i ? `<button class="btn small" type="button" data-bnfirst="${esc(b.id)}">First</button>` : '<span class="pill web">First</span>'}<button class="btn small danger" type="button" data-bndel="${esc(b.id)}">Delete</button></div>`).join('')
+    : '<div class="empty"><b>No banners of your own yet</b>The website shows its built-in banners until you add one here.</div>';
   if (siteDirty || $('#v-web').contains(document.activeElement)) return;
   $('#wsPhone').value = siteSet.whatsapp || ''; $('#wsOfferShow').checked = !!siteSet.offerShow; $('#wsOffer').value = siteSet.offerText || ''; $('#wsDisc').value = num(siteSet.discount) || '';
   const b = siteSet.bazaar || {}; $('#wsBzShow').checked = !!b.show; $('#wsBzName').value = b.name || bazaar || ''; $('#wsBzDate').value = b.date || ''; $('#wsBzPlace').value = b.place || '';
@@ -825,6 +851,35 @@ $('#wsSave').addEventListener('click', async () => {
   if (await write(() => db.doc('site/settings').set(body), 'Website settings saved')) { siteSet = body; siteDirty = false; }
 });
 $('#pWeb').addEventListener('change', e => { $('#webFields').hidden = !e.target.checked; });
+/* banners: public documents site/banner-<id> */
+let banners = [], bnPending = null, bnLight = false;
+$('#bnReady').addEventListener('change', e => { $('#bnTextFields').hidden = e.target.checked; });
+$('#bnImg').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const url = URL.createObjectURL(f), im = new Image();
+  im.onload = () => {
+    const k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+    c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+    const g = c.getContext('2d'); g.drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+    let q = .78; bnPending = c.toDataURL('image/jpeg', q);
+    while (bnPending.length > 700000 && q > .4) { q -= .08; bnPending = c.toDataURL('image/jpeg', q); }
+    try { const d = g.getImageData(0, 0, c.width, Math.max(1, Math.round(c.height * .16))).data; let sum = 0, n = 0; for (let i = 0; i < d.length; i += 64) { sum += d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11; n++; } bnLight = sum / n > 150; } catch (err) { bnLight = false; }
+    $('#bnPrev').src = bnPending; $('#bnPrev').hidden = false;
+  };
+  im.onerror = () => { URL.revokeObjectURL(url); toast('This picture could not be opened. Try a JPG or PNG.'); };
+  im.src = url;
+});
+$('#bnAdd').addEventListener('click', async () => {
+  if (!db) return;
+  if (!bnPending) { toast('Choose a picture first.'); return; }
+  const ready = $('#bnReady').checked, now = Date.now();
+  const body = {type:'banner', img:bnPending, ready, light:bnLight, kicker:ready ? '' : $('#bnKicker').value.trim(), text:ready ? '' : $('#bnText').value.trim(), label:ready ? '' : ($('#bnLabel').value.trim() || 'Shop now'), link:$('#bnLink').value, order:now};
+  const btn = $('#bnAdd'); btn.disabled = true;
+  if (await write(() => db.collection('site').doc('banner-' + now).set(body), 'Banner added to the website')) {
+    bnPending = null; $('#bnImg').value = ''; $('#bnPrev').hidden = true; $('#bnKicker').value = ''; $('#bnText').value = ''; $('#bnLabel').value = '';
+  }
+  btn.disabled = false;
+});
 $('#pImg').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   const url = URL.createObjectURL(f), im = new Image();
@@ -1049,6 +1104,7 @@ $('#exportBtn').addEventListener('click', async () => {
     db.doc('meta/tables').onSnapshot(snap => { tables = snap.exists ? {...(snap.data() || {})} : {}; render(); }, () => {});
     db.collection('catalog').onSnapshot(snap => { catalog = new Map(snap.docs.map(d => [d.id, d.data() || {}])); catReady = true; reconcile(); }, () => {});
     db.doc('site/settings').onSnapshot(snap => { if (snap.exists) siteSet = Object.assign({}, siteSet, snap.data() || {}); render(); }, () => {});
+    db.collection('site').onSnapshot(snap => { banners = snap.docs.filter(d => d.id.indexOf('banner-') === 0).map(d => Object.assign({id:d.id}, d.data() || {})).sort((x, y) => num(x.order) - num(y.order)); render(); }, () => {});
   });
 })();
 })();
